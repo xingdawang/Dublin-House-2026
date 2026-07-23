@@ -1,0 +1,44 @@
+name: South Dublin Housing Rental
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * 1"
+    - cron: "0 8 * * 1"
+
+jobs:
+  send-rental-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Dublin local time
+        id: local_time
+        run: |
+          echo "hour=$(TZ=Europe/Dublin date +%H)" >> "$GITHUB_OUTPUT"
+      - name: Stop outside 08:00 Dublin
+        if: github.event_name == 'schedule' && steps.local_time.outputs.hour != '08'
+        run: echo "Not 08:00 in Dublin; skipping."
+      - uses: actions/setup-python@v5
+        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        run: pip install -r requirements.txt
+      - name: Validate runtime data
+        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        run: |
+          test -f data/private_rentals.json
+          test -f data/cost_rental.json
+      - name: Test
+        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        run: pytest -q
+      - name: Generate and send
+        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python scripts/run_rental.py --send

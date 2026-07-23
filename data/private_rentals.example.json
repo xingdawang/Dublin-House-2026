@@ -1,0 +1,21 @@
+[
+  {
+    "source": "Daft.ie",
+    "provider": "Example Agent",
+    "title": "Example One-Bed Apartment",
+    "url": "https://www.daft.ie/",
+    "address": "Dublin 8",
+    "district": "Dublin 8",
+    "rent_eur": 1800,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "property_type": "Apartment",
+    "whole_unit": true,
+    "status": "available - example only",
+    "lease_term": "12 months",
+    "notes": "Example data only; replace with a freshly verified listing.",
+    "verified_at": "2026-07-23T00:00:00+01:00",
+    "latitude": 53.337,
+    "longitude": -6.285
+  }
+]

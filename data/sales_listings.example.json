@@ -1,0 +1,21 @@
+[
+  {
+    "source": "Affordable Homes Ireland",
+    "provider": "SDCC",
+    "title": "Example Affordable Purchase",
+    "url": "https://affordablehomes.ie/",
+    "address": "Tallaght, Dublin 24",
+    "region": "South Dublin",
+    "scheme": "affordable_purchase",
+    "price_eur": 320000,
+    "bedrooms": 2,
+    "property_type": "House",
+    "ber": "A2",
+    "status": "applications open - example only",
+    "eligibility": "Replace this example with the current official project conditions.",
+    "notes": "Example data only; do not use as a live listing.",
+    "verified_at": "2026-07-23T00:00:00+01:00",
+    "latitude": 53.2878,
+    "longitude": -6.3658
+  }
+]

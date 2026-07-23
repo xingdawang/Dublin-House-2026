@@ -1,0 +1,15 @@
+[
+  {
+    "source": "Affordable Homes Ireland",
+    "provider": "Example Provider",
+    "title": "Example Cost Rental Project",
+    "url": "https://affordablehomes.ie/rent/",
+    "address": "Dublin",
+    "rent_eur": 1500,
+    "bedrooms": 1,
+    "status": "applications closed - example only",
+    "eligibility": "Use the exact current conditions published on the official project page.",
+    "notes": "Example data only; replace before sending.",
+    "verified_at": "2026-07-23T00:00:00+01:00"
+  }
+]

@@ -1,0 +1,52 @@
+timezone: Europe/Dublin
+email_to: wxd598113636@gmail.com
+
+sales:
+  regions:
+    - South Dublin
+    - West Dublin
+    - Southwest Dublin
+    - Dublin 6W
+    - Dublin 8
+    - Dublin 12
+    - Dublin 14
+    - Dublin 16
+    - Dublin 18
+    - Dublin 20
+    - Dublin 24
+    - Tallaght
+    - Citywest
+    - Saggart
+    - Palmerstown
+    - Chapelizod
+  minimum_private_sale_ber: B1
+
+rental:
+  preferred_bedrooms: 1
+  max_two_bed_rent_eur: 2400
+  whole_unit_only: true
+  preferred_districts:
+    Dublin 1: 100
+    Dublin 2: 100
+    Dublin 7: 88
+    Dublin 8: 88
+    Dublin 3: 82
+    Dublin 4: 82
+    Dublin 6: 80
+    Dublin 6W: 75
+    Dublin 12: 70
+    Dublin 20: 64
+    Dublin 24: 60
+  sources:
+    - Daft.ie
+    - Rent.ie
+    - MyHome.ie
+    - Property.ie
+    - direct letting agents
+  cost_rental_sources:
+    - Affordable Homes Ireland
+    - LDA
+    - Clúid
+    - Tuath Housing
+    - Respond
+    - Circle VHA

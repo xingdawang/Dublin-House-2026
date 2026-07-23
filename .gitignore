@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.DS_Store
+
+# Generated reports and maps
+output/
+data/geocode_cache.json
+data/*.runtime.json
+
+# Runtime data can be private or frequently changing
+# Keep the example files in Git; actual feeds may be managed outside Git.
+data/sales_listings.json
+data/private_rentals.json
+data/cost_rental.json
