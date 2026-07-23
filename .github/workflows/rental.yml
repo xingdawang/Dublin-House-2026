@@ -13,29 +13,30 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check Dublin local time
         id: local_time
-        run: |
-          echo "hour=$(TZ=Europe/Dublin date +%H)" >> "$GITHUB_OUTPUT"
-      - name: Stop outside 08:00 Dublin
-        if: github.event_name == 'schedule' && steps.local_time.outputs.hour != '08'
-        run: echo "Not 08:00 in Dublin; skipping."
-      - uses: actions/setup-python@v5
+        run: echo "hour=$(TZ=Europe/Dublin date +%H)" >> "$GITHUB_OUTPUT"
+      - name: Check runtime data
+        id: runtime_data
         if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        run: |
+          if test -f data/private_rentals.json && test -f data/cost_rental.json; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Rental runtime data is not present; no email will be sent."
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.runtime_data.outputs.ready == 'true'
         with:
           python-version: "3.12"
           cache: pip
       - name: Install dependencies
-        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        if: steps.runtime_data.outputs.ready == 'true'
         run: pip install -r requirements.txt
-      - name: Validate runtime data
-        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
-        run: |
-          test -f data/private_rentals.json
-          test -f data/cost_rental.json
       - name: Test
-        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        if: steps.runtime_data.outputs.ready == 'true'
         run: pytest -q
       - name: Generate and send
-        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        if: steps.runtime_data.outputs.ready == 'true'
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
