@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlencode
@@ -69,16 +70,42 @@ def build_static_map_url(points: list[MapPoint], api_key: str) -> tuple[str, lis
     return "https://maps.googleapis.com/maps/api/staticmap?" + urlencode(params, doseq=True), legend
 
 
-def create_map(points: list[MapPoint], output_path: Path) -> MapResult:
+def create_map(
+    points: list[MapPoint],
+    output_path: Path,
+    *,
+    attempts: int = 3,
+    retry_delay_seconds: float = 2.0,
+) -> MapResult:
+    """Create and verify the map, retrying transient Google/network failures.
+
+    A failed attempt never produces a sendable map. The caller still performs
+    the final email-standard validation before delivery.
+    """
     api_key = os.getenv("GOOGLE_MAPS_API_KEY", "")
     try:
         url, legend = build_static_map_url(points, api_key)
-        response = httpx.get(url, timeout=45, follow_redirects=True)
-        content_type = response.headers.get("content-type", "").lower()
-        if response.status_code != 200 or not content_type.startswith("image/"):
-            raise RuntimeError(f"Google Maps returned HTTP {response.status_code}")
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_bytes(response.content)
-        return MapResult(url=url, image_path=output_path, labels=legend)
     except Exception as exc:
         return MapResult(url="", image_path=None, labels=[], error=str(exc))
+
+    last_error = ""
+    for attempt in range(1, max(1, attempts) + 1):
+        try:
+            response = httpx.get(url, timeout=45, follow_redirects=True)
+            content_type = response.headers.get("content-type", "").lower()
+            if response.status_code != 200 or not content_type.startswith("image/"):
+                raise RuntimeError(
+                    f"Google Maps returned HTTP {response.status_code} with content-type {content_type or 'unknown'}"
+                )
+            if not response.content:
+                raise RuntimeError("Google Maps returned an empty image")
+
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(response.content)
+            return MapResult(url=url, image_path=output_path, labels=legend)
+        except Exception as exc:
+            last_error = f"attempt {attempt}/{max(1, attempts)}: {exc}"
+            if attempt < max(1, attempts):
+                time.sleep(retry_delay_seconds * attempt)
+
+    return MapResult(url="", image_path=None, labels=[], error=last_error)
