@@ -47,6 +47,7 @@ def validate_report_html(
         "<img",
         expected_map_alt,
         f"cid:{expected_map_cid}",
+        "本期新闻与市场更新",
         "本期条目",
         "独立地图位置",
         "当前重点",
