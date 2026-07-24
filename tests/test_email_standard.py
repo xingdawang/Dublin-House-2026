@@ -1,5 +1,6 @@
 import pytest
 
+from dublin_house.emailer import validate_inline_images
 from dublin_house.report_validation import validate_direct_url, validate_report_html
 
 
@@ -50,6 +51,18 @@ def test_report_rejects_map_error_fallback():
             expected_map_alt="南都柏林住房租赁位置总览",
             expected_map_cid="rental-map",
         )
+
+
+def test_sender_rejects_missing_cid_attachment():
+    html = '<img alt="南都柏林住房销售位置总览" src="cid:sales-map">'
+    with pytest.raises(ValueError, match="Missing inline image attachments"):
+        validate_inline_images(html, {})
+
+
+def test_sender_rejects_missing_inline_image_file(tmp_path):
+    html = '<img alt="南都柏林住房销售位置总览" src="cid:sales-map">'
+    with pytest.raises(FileNotFoundError, match="sales-map"):
+        validate_inline_images(html, {"sales-map": tmp_path / "missing.png"})
 
 
 def test_direct_url_rejects_home_page():
