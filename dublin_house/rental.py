@@ -72,6 +72,8 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
     out = output_dir()
     map_result = create_map(points, out / "rental_map.png")
     generated_at = dublin_now()
+    map_cid = "rental-map"
+    map_src = f"cid:{map_cid}" if send and map_result.image_path else map_result.url
     html = render(
         "rental_report.html.j2",
         generated_at=generated_at.strftime("%Y-%m-%d %H:%M"),
@@ -80,7 +82,7 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
         focus_count=len(ranked),
         rentals=ranked,
         cost_rental=cost_rental,
-        map_src=map_result.url,
+        map_src=map_src,
         map_labels=map_result.labels,
         map_error=map_result.error,
         sources=settings["rental"]["sources"],
@@ -89,6 +91,11 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
     report_path.write_text(html, encoding="utf-8")
 
     if send:
-        validate_report_html(html, expected_map_alt="南都柏林住房租赁位置总览")
-        send_html(f"南都柏林住房租赁｜{generated_at:%Y-%m-%d}", html)
+        validate_report_html(
+            html,
+            expected_map_alt="南都柏林住房租赁位置总览",
+            expected_map_cid=map_cid,
+        )
+        images = {map_cid: map_result.image_path} if map_result.image_path else {}
+        send_html(f"南都柏林住房租赁｜{generated_at:%Y-%m-%d}", html, inline_images=images)
     return report_path
