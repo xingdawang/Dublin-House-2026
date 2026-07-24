@@ -17,7 +17,7 @@
 - 开发商新房
 - 私人二手出售房
 - Watchlist（Sale Agreed、申请关闭、资料待核实）
-- Google Static Maps 总览、编号、颜色图例和具体详情页直达链接
+- Google Static Maps CID 内嵌总览、编号、颜色图例和具体详情页直达链接
 
 ### 住房租赁
 
@@ -58,11 +58,11 @@ python scripts/run_sales.py --send
 python scripts/run_rental.py --send
 ```
 
-`--send` 会强制执行地图、摘要卡片和直达链接校验。详细配置见 [docs/SETUP.md](docs/SETUP.md)，定时任务和 GitHub Actions 说明见 [docs/SCHEDULING.md](docs/SCHEDULING.md)。
+`--send` 会强制执行 CID 内嵌地图、摘要卡片和直达链接校验。详细配置见 [docs/SETUP.md](docs/SETUP.md)，定时任务和 GitHub Actions 说明见 [docs/SCHEDULING.md](docs/SCHEDULING.md)。
 
 ## 安全说明
 
 - API Key、Gmail App Password 等只能放在 `.env` 或 GitHub Actions Secrets 中。
-- 生成的地图 URL 包含 Google Maps Key，因此不会提交到仓库。
+- Google Maps Key 只用于运行时下载地图；最终邮件通过 CID 内嵌图片展示，不在 HTML 中暴露 Key。
 - 项目不会绕过验证码、登录限制或商业平台的反自动化措施。
 - 房源状态变化很快，邮件生成前应重新核实原始页面。
