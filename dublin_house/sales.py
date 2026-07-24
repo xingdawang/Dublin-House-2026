@@ -53,6 +53,8 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
     map_result = create_map(points, out / "sales_map.png")
     generated_at = dublin_now()
     active_count = sum(len(buckets[key]) for key in ("affordable_purchase", "developer_new_build", "private_sale"))
+    map_cid = "sales-map"
+    map_src = f"cid:{map_cid}" if send and map_result.image_path else map_result.url
     html = render(
         "sales_report.html.j2",
         generated_at=generated_at.strftime("%Y-%m-%d %H:%M"),
@@ -60,7 +62,7 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
         location_count=len(map_result.labels),
         focus_count=active_count,
         sections=sections,
-        map_src=map_result.url,
+        map_src=map_src,
         map_labels=map_result.labels,
         map_error=map_result.error,
     )
@@ -68,6 +70,11 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
     report_path.write_text(html, encoding="utf-8")
 
     if send:
-        validate_report_html(html, expected_map_alt="南都柏林住房销售位置总览")
-        send_html(f"南都柏林住房销售｜{generated_at:%Y-%m-%d}", html)
+        validate_report_html(
+            html,
+            expected_map_alt="南都柏林住房销售位置总览",
+            expected_map_cid=map_cid,
+        )
+        images = {map_cid: map_result.image_path} if map_result.image_path else {}
+        send_html(f"南都柏林住房销售｜{generated_at:%Y-%m-%d}", html, inline_images=images)
     return report_path
