@@ -7,6 +7,8 @@
 - **南都柏林住房销售**：每天 08:00（Europe/Dublin）运行。
 - **南都柏林住房租赁**：每周一 08:00（Europe/Dublin）运行。
 
+销售和租赁邮件使用同一套固定版式与发送门槛，详见 [邮件统一标准](docs/EMAIL_STANDARD.md)。地图缺失、摘要卡片缺失或链接不是具体详情页时，正式发送会被阻止，不会再发送残缺版本。
+
 ## 邮件内容
 
 ### 住房销售
@@ -15,14 +17,14 @@
 - 开发商新房
 - 私人二手出售房
 - Watchlist（Sale Agreed、申请关闭、资料待核实）
-- Google Static Maps 总览、编号、颜色图例和原始详情页链接
+- Google Static Maps 总览、编号、颜色图例和具体详情页直达链接
 
 ### 住房租赁
 
 - Daft.ie 作为固定发现来源，并可补充其他可靠出租平台
 - 优先一室一厅整租和较低总月租
 - 公寓与 House 均可；位置稍远但租金明显更低的房源也会保留
-- Cost Rental 单独展示公开资格、申请状态和官方链接
+- Cost Rental 单独展示公开资格、申请状态和具体官方项目页
 - 邮件不写入任何个人姓名、雇主或收入信息
 
 ## 快速开始
@@ -56,7 +58,7 @@ python scripts/run_sales.py --send
 python scripts/run_rental.py --send
 ```
 
-详细配置见 [docs/SETUP.md](docs/SETUP.md)，定时任务和 GitHub Actions 说明见 [docs/SCHEDULING.md](docs/SCHEDULING.md)。
+`--send` 会强制执行地图、摘要卡片和直达链接校验。详细配置见 [docs/SETUP.md](docs/SETUP.md)，定时任务和 GitHub Actions 说明见 [docs/SCHEDULING.md](docs/SCHEDULING.md)。
 
 ## 安全说明
 
