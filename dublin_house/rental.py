@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .common import dublin_now, load_json_rows, load_settings, output_dir
 from .emailer import render, send_html
-from .maps import MapPoint, create_map
+from .maps import LABELS, MapPoint, create_map
 from .models import CostRentalProject, RentalListing
 from .report_validation import validate_direct_url, validate_report_html
 
@@ -35,7 +35,7 @@ def select_and_rank(rows: list[RentalListing], settings: dict) -> list[dict]:
         {
             "listing": item,
             "rank": index,
-            "marker": "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[index - 1],
+            "marker": LABELS[index - 1],
             "score": rental_score(item, cfg["preferred_districts"]),
         }
         for index, item in enumerate(ranked[:35], start=1)
@@ -47,10 +47,10 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
     rental_path = rental_file or os.getenv("RENTAL_DATA_FILE", "data/private_rentals.json")
     cost_path = cost_rental_file or os.getenv("COST_RENTAL_DATA_FILE", "data/cost_rental.json")
     rentals = [RentalListing.model_validate(row) for row in load_json_rows(rental_path)]
-    cost_rental = [CostRentalProject.model_validate(row) for row in load_json_rows(cost_path)]
+    cost_projects = [CostRentalProject.model_validate(row) for row in load_json_rows(cost_path)]
     for item in rentals:
         validate_direct_url(str(item.url), title=item.display_title)
-    for item in cost_rental:
+    for item in cost_projects:
         validate_direct_url(str(item.url), title=item.title)
 
     ranked = select_and_rank(rentals, settings)
@@ -64,8 +64,10 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
         )
         for row in ranked
     ]
-    for project in cost_rental:
+    cost_rental = []
+    for offset, project in enumerate(cost_projects, start=len(ranked)):
         points.append(MapPoint(project.title, project.address, "green"))
+        cost_rental.append({"project": project, "marker": LABELS[offset]})
 
     out = output_dir()
     map_result = create_map(points, out / "rental_map.png")
