@@ -7,24 +7,26 @@
 - **南都柏林住房销售**：每天 08:00（Europe/Dublin）运行。
 - **南都柏林住房租赁**：每周一 08:00（Europe/Dublin）运行。
 
-销售和租赁邮件使用同一套固定版式与发送门槛，详见 [邮件统一标准](docs/EMAIL_STANDARD.md)。地图缺失、摘要卡片缺失或链接不是具体详情页时，正式发送会被阻止，不会再发送残缺版本。
+销售和租赁邮件统一采用 **2026-07-24 09:13（Europe/Dublin）邮件版式**，详见 [邮件统一标准](docs/EMAIL_STANDARD.md)。缺少本期重点、摘要、Google Maps 总览入口、编号清单或房源独立地图链接时，正式发送会被阻止。
 
 ## 邮件内容
 
 ### 住房销售
 
+- 本期重点
 - Affordable Purchase
 - 开发商新房
 - 私人二手出售房
 - Watchlist（Sale Agreed、申请关闭、资料待核实）
-- Google Static Maps CID 内嵌总览、编号、颜色图例和具体详情页直达链接
+- Google Maps 总览入口、编号项目清单和每套房源的独立地图链接
 
 ### 住房租赁
 
-- Daft.ie 作为固定发现来源，并可补充其他可靠出租平台
+- 本期重点
+- Daft.ie 等可靠公开来源的私人整租
 - 优先一室一厅整租和较低总月租
-- 公寓与 House 均可；位置稍远但租金明显更低的房源也会保留
-- Cost Rental 单独展示公开资格、申请状态和具体官方项目页
+- Cost Rental 的公开资格、申请状态和具体官方项目页
+- Google Maps 总览入口、编号项目清单和每套房源的独立地图链接
 - 邮件不写入任何个人姓名、雇主或收入信息
 
 ## 快速开始
@@ -58,11 +60,11 @@ python scripts/run_sales.py --send
 python scripts/run_rental.py --send
 ```
 
-`--send` 会强制执行 CID 内嵌地图、摘要卡片和直达链接校验。详细配置见 [docs/SETUP.md](docs/SETUP.md)，定时任务和 GitHub Actions 说明见 [docs/SCHEDULING.md](docs/SCHEDULING.md)。
+`--send` 会强制执行 09:13 基准版式、Google Maps 总览与独立地图链接、摘要字段和直达详情页校验。详细配置见 [docs/SETUP.md](docs/SETUP.md)，定时任务和 GitHub Actions 说明见 [docs/SCHEDULING.md](docs/SCHEDULING.md)。
 
 ## 安全说明
 
-- API Key、Gmail App Password 等只能放在 `.env` 或 GitHub Actions Secrets 中。
-- Google Maps Key 只用于运行时下载地图；最终邮件通过 CID 内嵌图片展示，不在 HTML 中暴露 Key。
+- Gmail App Password 等敏感信息只能放在 `.env` 或 GitHub Actions Secrets 中。
+- 邮件地图采用普通 Google Maps Search 链接，不需要在邮件 HTML 中使用 Google Maps API Key。
 - 项目不会绕过验证码、登录限制或商业平台的反自动化措施。
 - 房源状态变化很快，邮件生成前应重新核实原始页面。
