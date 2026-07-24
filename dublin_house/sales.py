@@ -31,6 +31,37 @@ def organize(rows: list[SalesListing]) -> dict[str, list[SalesListing]]:
     return buckets
 
 
+def _short(text: str, limit: int = 180) -> str:
+    value = " ".join(text.split())
+    return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
+
+
+def build_sales_news(buckets: dict[str, list[SalesListing]]) -> list[str]:
+    """Build a stable top-of-email news/update block from verified listings."""
+    news: list[str] = []
+
+    affordable = [item for item in buckets["affordable_purchase"] if not item.is_closed]
+    for item in affordable[:2]:
+        detail = item.notes or item.status
+        news.append(f"{item.title}：{_short(detail)}")
+
+    new_builds = [item for item in buckets["developer_new_build"] if not item.is_closed]
+    if new_builds:
+        names = "、".join(item.title for item in new_builds[:3])
+        news.append(f"开发商新房更新：本期重点跟踪 {names}。")
+
+    private_sales = [item for item in buckets["private_sale"] if not item.is_closed and item.price_eur]
+    if private_sales:
+        cheapest = min(private_sales, key=lambda item: item.price_eur or 10**12)
+        news.append(f"二手房价格观察：当前较低总价选项为 {cheapest.title}，挂牌 €{cheapest.price_eur:,}。")
+
+    watch_count = len(buckets["market_watch"])
+    if watch_count:
+        news.append(f"状态提醒：另有 {watch_count} 个项目已关闭、Sale Agreed 或仍待进一步核实。")
+
+    return news[:4] or ["本期没有核实到新的销售动态；现有房源状态仍会继续跟踪。"]
+
+
 def generate(*, send: bool = False, data_file: str | None = None) -> Path:
     source = data_file or os.getenv("SALES_DATA_FILE", "data/sales_listings.json")
     rows = [SalesListing.model_validate(row) for row in load_json_rows(source)]
@@ -58,6 +89,7 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
     html = render(
         "sales_report.html.j2",
         generated_at=generated_at.strftime("%Y-%m-%d %H:%M"),
+        news_items=build_sales_news(buckets),
         total_count=len(rows),
         location_count=len(map_result.labels),
         focus_count=active_count,
