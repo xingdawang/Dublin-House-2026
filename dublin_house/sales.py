@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .common import dublin_now, load_json_rows, output_dir
 from .emailer import render, send_html
-from .maps import MapPoint, create_map
+from .maps import LABELS, MapPoint, create_map
 from .models import SalesListing
 from .report_validation import validate_direct_url, validate_report_html
 
@@ -39,9 +39,15 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
 
     buckets = organize(rows)
     points: list[MapPoint] = []
-    for key, (_, color) in SECTIONS.items():
+    sections: list[dict] = []
+    marker_index = 0
+    for key, (title, color) in SECTIONS.items():
+        rendered_items = []
         for item in buckets[key]:
             points.append(MapPoint(item.display_title, item.address, color, item.latitude, item.longitude))
+            rendered_items.append({"listing": item, "marker": LABELS[marker_index]})
+            marker_index += 1
+        sections.append({"key": key, "title": title, "color": color, "items": rendered_items})
 
     out = output_dir()
     map_result = create_map(points, out / "sales_map.png")
@@ -53,10 +59,7 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
         total_count=len(rows),
         location_count=len(map_result.labels),
         focus_count=active_count,
-        sections=[
-            {"key": key, "title": title, "color": color, "items": buckets[key]}
-            for key, (title, color) in SECTIONS.items()
-        ],
+        sections=sections,
         map_src=map_result.url,
         map_labels=map_result.labels,
         map_error=map_result.error,
