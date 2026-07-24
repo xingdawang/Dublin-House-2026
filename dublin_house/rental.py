@@ -42,6 +42,19 @@ def select_and_rank(rows: list[RentalListing], settings: dict) -> list[dict]:
     ]
 
 
+def build_rental_news(ranked: list[dict], cost_projects: list[CostRentalProject]) -> list[str]:
+    news: list[str] = []
+    if ranked:
+        cheapest = min(ranked, key=lambda row: row["listing"].rent_eur)["listing"]
+        news.append(f"租金观察：本期较低总租金选项为 {cheapest.title}，€{cheapest.rent_eur:,}/月。")
+        one_bed_count = sum(1 for row in ranked if row["listing"].bedrooms == 1)
+        news.append(f"整租更新：共核实 {len(ranked)} 套符合筛选条件的房源，其中一居室 {one_bed_count} 套。")
+    if cost_projects:
+        names = "、".join(project.title for project in cost_projects[:3])
+        news.append(f"Cost Rental 更新：本期继续跟踪 {names} 的申请状态与公开条件。")
+    return news[:4] or ["本期没有核实到新的租赁动态；现有项目仍会继续跟踪。"]
+
+
 def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_file: str | None = None) -> Path:
     settings = load_settings()
     rental_path = rental_file or os.getenv("RENTAL_DATA_FILE", "data/private_rentals.json")
@@ -77,6 +90,7 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
     html = render(
         "rental_report.html.j2",
         generated_at=generated_at.strftime("%Y-%m-%d %H:%M"),
+        news_items=build_rental_news(ranked, cost_projects),
         total_count=len(ranked) + len(cost_rental),
         location_count=len(map_result.labels),
         focus_count=len(ranked),
