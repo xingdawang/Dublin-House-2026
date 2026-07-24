@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{EMAIL_TITLE}}</title>
+</head>
+<body style="margin:0;background:#f3f5f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#172033;">
+  <div style="max-width:780px;margin:0 auto;background:#ffffff;padding:26px 18px 36px;">
+    <div style="border-bottom:1px solid #e4e8ef;padding-bottom:18px;">
+      <h1 style="margin:0 0 8px;font-size:28px;line-height:1.25;">{{EMAIL_TITLE}}</h1>
+      <p style="margin:0;color:#667085;font-size:14px;line-height:1.6;">更新日期：{{UPDATE_DATE}} · 信息核验：{{VERIFIED_AT}}</p>
+    </div>
+
+    <div style="margin:18px 0 8px;padding:14px 15px;border:1px solid #cfe2ff;background:#eef6ff;border-radius:12px;line-height:1.65;">
+      <b>本期重点：</b>{{HIGHLIGHT_TEXT}}
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="8" style="margin:14px -8px 18px;border-collapse:separate;">
+      <tr>
+        <td style="border:1px solid #d9e0ea;border-radius:12px;padding:12px;background:#f8fafc;">
+          <div style="font-size:12px;color:#667085;">本期条目</div>
+          <b style="font-size:22px;">{{ITEM_COUNT}}</b>
+        </td>
+        <td style="border:1px solid #d9e0ea;border-radius:12px;padding:12px;background:#f8fafc;">
+          <div style="font-size:12px;color:#667085;">独立地图位置</div>
+          <b style="font-size:22px;">{{LOCATION_COUNT}}</b>
+        </td>
+        <td style="border:1px solid #d9e0ea;border-radius:12px;padding:12px;background:#f8fafc;">
+          <div style="font-size:12px;color:#667085;">当前重点</div>
+          <b style="font-size:22px;">{{FOCUS_COUNT}}</b>
+        </td>
+      </tr>
+    </table>
+
+    <section style="border:1px solid #d9e0ea;border-radius:14px;padding:16px;margin:18px 0;background:#f8fafc;">
+      <h2 style="margin:0 0 8px;font-size:20px;">{{MAP_SECTION_TITLE}}</h2>
+      <p style="margin:0 0 12px;color:#667085;font-size:13px;line-height:1.6;">同一项目共用一个地图点位；编号与下方房源卡片一致。</p>
+      <a href="{{GOOGLE_MAPS_OVERVIEW_URL}}" style="text-decoration:none;">
+        <img src="{{GOOGLE_STATIC_MAP_URL}}" alt="{{MAP_ALT_TEXT}}" width="640" style="display:block;width:100%;max-width:640px;height:auto;border:0;border-radius:10px;margin:0 auto 10px;">
+      </a>
+      <p style="margin:0 0 12px;font-size:12px;line-height:1.7;text-align:center;">
+        {{COLOR_LEGEND_HTML}}
+      </p>
+      <div style="font-size:12px;line-height:1.75;color:#475467;">
+        {{NUMBERED_LOCATION_LIST_HTML}}
+      </div>
+    </section>
+
+    {{CATEGORY_SECTIONS_HTML}}
+
+    <h2 style="font-size:21px;margin:28px 0 12px;color:#475467;">Watchlist</h2>
+    <div style="border:1px solid #d8dee9;border-radius:14px;padding:16px;background:#f8f9fb;line-height:1.65;">
+      {{WATCHLIST_HTML}}
+    </div>
+
+    <div style="margin-top:26px;padding-top:18px;border-top:1px solid #e4e8ef;color:#667085;font-size:12px;line-height:1.65;">
+      {{DISCLAIMER_TEXT}}
+    </div>
+  </div>
+</body>
+</html>
+
+<!--
+CATEGORY_SECTIONS_HTML must use this structure for every category and listing:
+
+<h2 style="font-size:21px;margin:26px 0 12px;color:{{CATEGORY_HEADING_COLOR}};">{{CATEGORY_NAME}}</h2>
+
+<article style="border:{{BORDER_WIDTH}} solid {{CARD_BORDER_COLOR}};border-radius:14px;padding:16px;margin:12px 0;">
+  <div style="font-size:12px;color:{{CATEGORY_TEXT_COLOR}};font-weight:800;">{{MAP_LABEL}} · {{STATUS}}</div>
+  <h3 style="margin:6px 0 8px;font-size:19px;">{{PROPERTY_TITLE}}</h3>
+  <p style="margin:5px 0;"><b>{{PROPERTY_SUMMARY}}</b></p>
+  <p style="margin:7px 0;color:#475467;line-height:1.6;">{{PROPERTY_DESCRIPTION}}</p>
+  <p style="margin:10px 0 0;">
+    <a href="{{DETAIL_URL}}" style="font-weight:700;color:{{CATEGORY_TEXT_COLOR}};">{{DETAIL_LINK_LABEL}}</a>
+   　|　
+    <a href="{{GOOGLE_MAPS_URL}}" style="color:{{CATEGORY_TEXT_COLOR}};">Google Maps</a>
+  </p>
+</article>
+
+Sales palette:
+- Affordable Purchase heading/link: #1d4ed8; strong border: #2563eb; light border: #b8cff8
+- Developer new homes heading/link: #6d28d9; label: #7c3aed; light border: #d8c7f8
+- Private resale heading/link: #b42318; label: #dc2626; strong border: #ef4444; light border: #f2b8b5
+- Watchlist: #475467 / #d8dee9 / #f8f9fb
+
+Rental palette:
+- Private rental: orange family
+- Cost Rental: green family
+- Watchlist/unverified: gray family
+
+Never commit or expose a real Google Maps API key. Populate GOOGLE_STATIC_MAP_URL at runtime from a secure environment value.
+Send this file as raw HTML using Gmail html_body or content_type="text/html". Never pass it through the default Markdown body renderer.
+-->
