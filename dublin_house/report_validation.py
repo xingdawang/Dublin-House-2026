@@ -31,11 +31,22 @@ def validate_direct_url(url: str, *, title: str) -> None:
         raise ValueError(f"{title}: URL appears to be a search/category page: {url}")
 
 
-def validate_report_html(html: str, *, expected_map_alt: str) -> None:
+def validate_report_html(
+    html: str,
+    *,
+    expected_map_alt: str,
+    expected_map_cid: str,
+) -> None:
+    """Enforce the shared email layout before an email is sent.
+
+    The map must be a CID image attached to the message, rather than a remote
+    Static Maps URL. This keeps the API key out of the delivered HTML and makes
+    rendering independent of the recipient's external-image settings.
+    """
     required = (
-        "maps.googleapis.com/maps/api/staticmap",
         "<img",
         expected_map_alt,
+        f"cid:{expected_map_cid}",
         "本期条目",
         "独立地图位置",
         "当前重点",
@@ -46,3 +57,6 @@ def validate_report_html(html: str, *, expected_map_alt: str) -> None:
 
     if "地图暂不可用" in html:
         raise ValueError("Email standard validation failed: map fallback is not sendable")
+
+    if "maps.googleapis.com/maps/api/staticmap" in html:
+        raise ValueError("Email standard validation failed: the map must be CID-embedded")
