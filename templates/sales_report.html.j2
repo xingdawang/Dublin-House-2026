@@ -1,10 +1,7 @@
 <!doctype html><html><body style="font-family:Arial,sans-serif;color:#172033;max-width:780px;margin:0 auto;background:#fff"><div style="padding:24px 16px">
 <h1 style="margin:0 0 8px;font-size:28px">南都柏林住房销售</h1>
-<p style="margin:0 0 18px;color:#526078;line-height:1.55">核验时间：{{generated_at}}。房源按 Affordable Purchase、开发商新房、私人二手出售房和 Watchlist 分类。</p>
-<section style="border:1px solid #cfe3ff;border-radius:14px;padding:16px;margin:0 0 18px;background:#f5f9ff">
-<h2 style="margin:0 0 10px;font-size:20px">本期新闻与市场更新</h2>
-<ul style="margin:0;padding-left:20px;line-height:1.65;color:#344054">{% for item in news_items %}<li style="margin:5px 0">{{item}}</li>{% endfor %}</ul>
-</section>
+<p style="margin:0 0 8px;color:#526078;line-height:1.55">更新日期：{{updated_date}} · 信息核验：{{verified_label}}</p>
+<p style="margin:0 0 18px;line-height:1.65"><b>本期重点：</b>{{focus_summary}}</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="8" style="margin:0 -8px 18px;border-collapse:separate"><tr>
 <td style="border:1px solid #d9e0ea;border-radius:12px;padding:12px;background:#f8fafc"><div style="font-size:12px;color:#667085">本期条目</div><b style="font-size:22px">{{total_count}}</b></td>
 <td style="border:1px solid #d9e0ea;border-radius:12px;padding:12px;background:#f8fafc"><div style="font-size:12px;color:#667085">独立地图位置</div><b style="font-size:22px">{{location_count}}</b></td>
@@ -12,11 +9,15 @@
 </tr></table>
 <section style="border:1px solid #d9e0ea;border-radius:14px;padding:16px;margin:18px 0;background:#f8fafc">
 <h2 style="margin:0 0 8px;font-size:20px">所有房源位置总览</h2>
-<p style="margin:0 0 12px;color:#667085;font-size:13px">同一楼盘的不同户型共用一个点位；编号与下方详情卡片一致。</p>
-{% if map_src %}<img src="{{map_src}}" width="640" alt="南都柏林住房销售位置总览" style="display:block;width:100%;max-width:640px;height:auto;border:0;border-radius:10px;margin:0 auto 10px">{% elif map_error %}<p style="color:#8a4b08">地图暂不可用：{{map_error}}</p>{% endif %}
-<p style="font-size:12px;line-height:1.7;text-align:center"><span style="color:blue;font-weight:bold">蓝色＝Affordable Purchase</span>；<span style="color:purple;font-weight:bold">紫色＝开发商新房</span>；<span style="color:red;font-weight:bold">红色＝二手 House</span>；<span style="color:gray;font-weight:bold">灰色＝待核实／Sale Agreed</span></p>
-{% if map_labels %}<table role="presentation" width="100%" style="border-collapse:collapse;font-size:12px">{% for item in map_labels %}<tr><td style="width:32px;padding:4px"><b>{{item.label}}</b></td><td style="padding:4px"><b>{{item.title}}</b><br><span style="color:#667085">{{item.address}}</span></td></tr>{% endfor %}</table>{% endif %}
+<p style="margin:0 0 12px;color:#667085;font-size:13px">同一项目共用一个地图点位；编号与下方房源卡片一致。</p>
+<p style="margin:0 0 14px"><a href="{{map_overview_url}}" style="display:inline-block;background:#1967d2;color:#fff;text-decoration:none;font-weight:bold;padding:10px 14px;border-radius:8px">南都柏林住房销售位置总览</a></p>
+<p style="font-size:12px;line-height:1.7"><span style="color:blue;font-weight:bold">蓝色＝Affordable Purchase</span>；<span style="color:purple;font-weight:bold">紫色＝开发商新房</span>；<span style="color:red;font-weight:bold">红色＝二手 House</span>；<span style="color:gray;font-weight:bold">灰色＝待核实／Sale Agreed</span></p>
+<p style="font-size:13px;line-height:2;margin:8px 0 0">{% for item in map_labels %}<span style="display:inline-block;margin-right:14px"><b>{{item.label}}</b> {{item.title}}</span>{% endfor %}</p>
 </section>
-{% for section in sections %}<section style="margin:28px 0"><h2 style="font-size:22px;border-left:5px solid {{section['color']}};padding-left:10px">{{section['title']}}（{{section['items']|length}}）</h2>
-{% for row in section['items'] %}{% set x=row.listing %}<article style="border:1px solid #d9e0ea;border-radius:12px;padding:15px;margin:12px 0"><div style="font-size:12px;color:#667085"><b>地图点位 {{row.marker}}</b> · {{x.source}}</div><h3 style="margin:8px 0;font-size:18px">{{x.display_title}}</h3><p style="margin:5px 0"><b>{{x.property_type}}</b>{% if x.bedrooms is not none %} · {{x.bedrooms}} Bed{% endif %}{% if x.bathrooms is not none %} · {{x.bathrooms}} Bath{% endif %} · BER {{x.ber}}{% if x.price_eur %} · <b>€{{'{:,}'.format(x.price_eur)}}</b>{% endif %}</p><p style="margin:5px 0;color:#475467">{{x.address}}</p><p style="margin:5px 0;color:#475467"><b>状态：</b>{{x.status}}</p>{% if x.notes %}<p style="color:#475467">{{x.notes}}</p>{% endif %}{% if x.eligibility %}<div style="background:#f0f7ff;border:1px solid #cfe3ff;border-radius:9px;padding:10px"><b>申请条件：</b>{{x.eligibility}}</div>{% endif %}<p><a href="{{x.url}}" style="font-weight:bold">直接打开具体详情页</a>　|　<a href="{{x.google_maps_url}}">Google Maps</a></p></article>{% else %}<p style="color:#667085">本期没有合适项目。</p>{% endfor %}</section>{% endfor %}
-<p style="font-size:12px;color:#667085;margin-top:22px;line-height:1.45">所有按钮必须直达具体项目或具体房源详情页；首页、搜索页、地区列表页和分类页不作为有效链接。挂牌价格、销售状态和申请窗口变化很快，请以原始页面及中介或主管机构最终确认为准。</p></div></body></html>
+{% for section in sections %}<section style="margin:28px 0"><h2 style="font-size:22px;border-left:5px solid {{section['color']}};padding-left:10px">{{section['title']}}</h2>
+{% if section['key'] == 'market_watch' %}
+{% for row in section['items'] %}{% set x=row.listing %}<p style="line-height:1.6;margin:12px 0"><b>{{row.marker}} · {{x.display_title}}</b>：{% if x.notes %}{{x.notes}}{% else %}{{x.status}}{% endif %}</p>{% else %}<p style="color:#667085">本期没有 Watchlist 项目。</p>{% endfor %}
+{% else %}
+{% for row in section['items'] %}{% set x=row.listing %}<article style="border:1px solid #d9e0ea;border-radius:12px;padding:15px;margin:12px 0"><div style="font-size:12px;color:#667085"><b>{{row.marker}} · {{x.status}}</b></div><h3 style="margin:8px 0;font-size:18px">{{x.display_title}}</h3><p style="margin:5px 0">{% if x.price_eur %}<b>€{{'{:,}'.format(x.price_eur)}}</b>{% else %}<b>Price on Application</b>{% endif %}{% if x.bedrooms is not none %} · {{x.bedrooms}} Bed{% endif %}{% if x.bathrooms is not none %} · {{x.bathrooms}} Bath{% endif %}{% if x.property_type %} · {{x.property_type}}{% endif %}{% if x.ber %} · BER {{x.ber}}{% endif %}</p><p style="margin:5px 0;color:#475467">{{x.address}}</p>{% if x.notes %}<p style="color:#475467;line-height:1.55">{{x.notes}}</p>{% endif %}{% if x.eligibility %}<div style="background:#f0f7ff;border:1px solid #cfe3ff;border-radius:9px;padding:10px"><b>申请条件：</b>{{x.eligibility}}</div>{% endif %}<p>{% if section['key'] == 'affordable_purchase' %}<a href="{{x.url}}" style="font-weight:bold">打开官方项目页</a>{% elif section['key'] == 'developer_new_build' %}<a href="{{x.url}}" style="font-weight:bold">查看开发项目</a>{% else %}<a href="{{x.url}}" style="font-weight:bold">查看原始详情页</a>{% endif %}　|　<a href="{{x.google_maps_url}}">Google Maps</a></p></article>{% else %}<p style="color:#667085">本期没有合适项目。</p>{% endfor %}
+{% endif %}</section>{% endfor %}
+<p style="font-size:12px;color:#667085;margin-top:22px;line-height:1.45">房源状态和价格可能随时变化。邮件中的“在售”仅表示核验时页面仍可访问或仍出现在平台结果中；预约看房、申请或出价前，请在原始页面再次确认。Affordable Purchase 的资格、材料清单和申请窗口以官方项目页面为准。</p></div></body></html>
