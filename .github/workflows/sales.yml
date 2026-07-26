@@ -20,11 +20,11 @@ jobs:
         id: runtime_data
         if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
         run: |
-          if test -f data/sales_listings.json; then
+          if test -f data/sales_listings.json && test -f data/sales_insights.json; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "sales_listings.json is not present; no email will be sent."
+            echo "sales_listings.json or sales_insights.json is not present; no email will be sent."
           fi
       - uses: actions/setup-python@v5
         if: steps.runtime_data.outputs.ready == 'true'
