@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from html import unescape
 from pathlib import PurePosixPath
 from urllib.parse import urlparse
 
@@ -40,12 +41,10 @@ def validate_report_html(
 ) -> None:
     """Enforce the canonical housing-email layout.
 
-    Every report must include the summary cards, a Google Maps overview link,
-    a numbered location index, and individual Google Maps links. Sales reports
-    additionally require a visible Google Static Maps image and the coloured
-    circular marker legend. Validation fails closed when any required map
-    element is missing.
+    HTML entities are decoded before validation so both raw ``&query=`` links
+    and email-client-safe ``&amp;query=`` links are treated identically.
     """
+    normalized_html = unescape(html)
     required = [
         "更新日期：",
         "信息核验：",
@@ -54,7 +53,7 @@ def validate_report_html(
         "独立地图位置",
         "当前重点",
         overview_title,
-        "https://www.google.com/maps/search/?api=1&amp;query=",
+        "https://www.google.com/maps/search/?api=1&query=",
         "Google Maps",
     ]
     if require_static_map:
@@ -67,7 +66,7 @@ def validate_report_html(
             ]
         )
 
-    missing = [token for token in required if token not in html]
+    missing = [token for token in required if token not in normalized_html]
     if missing:
         raise ValueError("Email standard validation failed; missing: " + ", ".join(missing))
 
@@ -77,6 +76,6 @@ def validate_report_html(
         "地图暂不可用",
         "本期新闻与市场更新",
     )
-    present = [token for token in forbidden if token in html]
+    present = [token for token in forbidden if token in normalized_html]
     if present:
         raise ValueError("Email standard validation failed; obsolete format found: " + ", ".join(present))
