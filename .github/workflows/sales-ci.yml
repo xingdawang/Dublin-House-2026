@@ -16,6 +16,8 @@ permissions:
 jobs:
   validate-sales-email:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,13 +26,51 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest -q
-      - name: Generate sales email preview
+      - name: Run tests and capture output
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          pytest -q > pytest.log 2>&1
+          code=$?
+          cat pytest.log
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload pytest output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-output
+          path: pytest.log
+          if-no-files-found: error
+      - name: Stop when tests fail
+        if: steps.tests.outputs.code != '0'
+        run: exit 1
+      - name: Generate sales email preview and capture output
+        id: generate
+        if: steps.tests.outputs.code == '0'
+        shell: bash
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-        run: python scripts/run_sales.py
+        run: |
+          set +e
+          python scripts/run_sales.py > generate.log 2>&1
+          code=$?
+          cat generate.log
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload generation output
+        if: always() && steps.tests.outputs.code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generation-output
+          path: generate.log
+          if-no-files-found: error
+      - name: Stop when generation fails
+        if: steps.tests.outputs.code == '0' && steps.generate.outputs.code != '0'
+        run: exit 1
       - name: Upload rendered preview
+        if: steps.tests.outputs.code == '0' && steps.generate.outputs.code == '0'
         uses: actions/upload-artifact@v4
         with:
           name: sales-email-preview
