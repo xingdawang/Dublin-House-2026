@@ -128,5 +128,39 @@
     "status": "Current Availability Example",
     "notes": "3 居 Duplex，约 107㎡，继续作为 Cherrywood 新房价格、Luas 通勤和社区成熟度的比较项目。",
     "verified_at": "2026-07-26"
+  },
+  {
+    "source": "MyHome",
+    "provider": "Berkeley & Associates",
+    "title": "14 Foxdene Drive",
+    "url": "https://www.myhome.ie/residential/brochure/14-foxdene-drive-baldonnel-dublin-22/5002435",
+    "address": "14 Foxdene Drive, Baldonnel, Dublin 22",
+    "region": "Baldonnel / Dublin 22",
+    "scheme": "private_sale",
+    "price_eur": 285000,
+    "bedrooms": 3,
+    "bathrooms": 1,
+    "property_type": "Terraced House",
+    "ber": "UNKNOWN",
+    "status": "Current Listing",
+    "notes": "约 86㎡，挂牌约 €3,314/㎡。在当前可见的 Dublin 22 三居 House 中，总价和单位面积价格都具有较强的初筛性价比；仍需核验房屋状况、翻修预算和出价进度。",
+    "verified_at": "2026-07-26"
+  },
+  {
+    "source": "Daft",
+    "provider": "Dixon Residential",
+    "title": "53 Kilcronan Avenue",
+    "url": "https://www.daft.ie/for-sale/53-kilcronan-avenue-clondalkin-dublin-22/6569080",
+    "address": "53 Kilcronan Avenue, Clondalkin, Dublin 22, D22 XF90",
+    "region": "Clondalkin / Dublin 22",
+    "scheme": "private_sale",
+    "price_eur": 295000,
+    "bedrooms": 3,
+    "bathrooms": 1,
+    "property_type": "End of Terrace House",
+    "ber": "UNKNOWN",
+    "status": "Offers in Progress",
+    "notes": "约 80㎡，挂牌约 €3,688/㎡。Daft 页面提供在线报价进度、挂牌日期和交通信息，适合作为同区域三居 House 的实时竞争基准。",
+    "verified_at": "2026-07-26"
   }
 ]
