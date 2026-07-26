@@ -8,6 +8,7 @@ on:
       - "tests/**"
       - "data/sales_listings.json"
       - ".github/workflows/sales-ci.yml"
+      - ".github/send-sales-email"
   workflow_dispatch:
 
 permissions:
@@ -78,3 +79,11 @@ jobs:
             output/sales_report.html
             output/sales_map.png
           if-no-files-found: error
+      - name: Send verified sales email once
+        if: steps.tests.outputs.code == '0' && steps.generate.outputs.code == '0' && hashFiles('.github/send-sales-email') != ''
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: python scripts/run_sales.py --send
