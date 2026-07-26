@@ -7,6 +7,8 @@ CANONICAL_SALES_HTML = """
 <p>更新日期：2026-07-26 · 信息核验：2026-07-26 上午</p>
 <p>本期重点：两个项目即将开放。</p>
 <div>本期条目 12 独立地图位置 12 当前重点 10</div>
+<div>地图颜色汇总（各颜色数量之和＝12 个地图点位）</div>
+<div>市场资讯卡不计入地图</div>
 <h2>所有房源位置总览</h2>
 <a href="https://www.google.com/maps/search/?api=1&amp;query=South+Dublin+housing">
   <img src="https://maps.googleapis.com/maps/api/staticmap?size=640x480&amp;key=test"
@@ -79,6 +81,16 @@ def test_report_rejects_missing_static_map():
 def test_report_rejects_missing_marker_legend():
     html = CANONICAL_SALES_HTML.replace("border-radius:50%", "border-radius:0")
     with pytest.raises(ValueError):
+        validate_report_html(
+            html,
+            overview_title="所有房源位置总览",
+            require_static_map=True,
+        )
+
+
+def test_report_rejects_empty_sales_section_placeholder():
+    html = CANONICAL_SALES_HTML + "<p>本期没有合适项目。</p>"
+    with pytest.raises(ValueError, match="obsolete format"):
         validate_report_html(
             html,
             overview_title="所有房源位置总览",

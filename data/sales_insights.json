@@ -1,0 +1,38 @@
+[
+  {
+    "section": "private_sale",
+    "source": "MyHome / Daft",
+    "title": "Dublin 22 二手 House 平台性价比观察",
+    "url": "https://www.myhome.ie/residential/dublin/house-for-sale-in-dublin-22",
+    "status": "平台对比",
+    "summary": "本期可见挂牌中，MyHome 的 14 Foxdene Drive 为三居约 €285,000，Daft 的 53 Kilcronan Avenue 为三居约 €295,000。按当前可见入场价和单位面积价格，MyHome 的低价代表略占优势；Daft 则在在线报价、开放看房和即时状态方面信息更细。后续日报应同时检查两个平台，而不是只依赖其中一个。",
+    "verified_at": "2026-07-26"
+  },
+  {
+    "section": "price_change",
+    "source": "Evara / Savills / MyHome / Daft",
+    "title": "本期价格基线已建立，后续按同一房源追踪变化",
+    "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses",
+    "status": "价格基线",
+    "summary": "本期尚未确认监控项目出现明确降价，因此不再显示空白提示。新房以 Avenlea €370,000、Redford €500,000、Aderrig €545,000 为起始参考；二手 House 以 14 Foxdene Drive €285,000 和 53 Kilcronan Avenue €295,000 为低价基线。后续只有同一项目或同一房源价格、状态发生变化时，才标记为已确认变化。",
+    "verified_at": "2026-07-26"
+  },
+  {
+    "section": "planning_future",
+    "source": "South Dublin County Council",
+    "title": "South Dublin County Development Plan Variation No. 2",
+    "url": "https://sdcc.ie/en/services/planning-building-control/development-plan/plan-2022-2028/variation-2/",
+    "status": "Planning 更新",
+    "summary": "South Dublin County Council 正就 Variation No. 2 的 Material Alterations 展开公开咨询，提交期为 2026-07-07 至 2026-08-05。该变化涉及住房增长要求和紧凑型住宅开发政策，可能影响南都柏林后续住宅供应、密度与项目推进节奏。",
+    "verified_at": "2026-07-26"
+  },
+  {
+    "section": "market_watch",
+    "source": "South Dublin County Council",
+    "title": "Canal Bank, Clonburris · 申请评估中",
+    "url": "https://sdcc.ie/en/services/housing/starter-homes-programme/canal-bank-clonburris/",
+    "status": "Watchlist 更新",
+    "summary": "Canal Bank 的申请入口目前已关闭，SDCC 正按收到顺序及 Scheme of Priority 进行评估。该项目继续保留在 Watchlist，用于跟踪评估结果、候补进展以及 Clonburris 后续批次。",
+    "verified_at": "2026-07-26"
+  }
+]
