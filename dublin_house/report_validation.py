@@ -32,14 +32,19 @@ def validate_direct_url(url: str, *, title: str) -> None:
         raise ValueError(f"{title}: URL appears to be a search/category page: {url}")
 
 
-def validate_report_html(html: str, *, overview_title: str) -> None:
-    """Enforce the canonical 2026-07-24 09:13 housing-email layout.
+def validate_report_html(
+    html: str,
+    *,
+    overview_title: str,
+    require_static_map: bool = False,
+) -> None:
+    """Enforce the canonical housing-email layout.
 
-    The approved map treatment is a visible Google Maps overview link, a
-    numbered location index, and an individual Google Maps link on each active
-    listing. It is intentionally not an embedded Static Maps image.
+    Sales reports require a visible Google Static Maps image, the numbered
+    location index, summary cards, and individual Google Maps links. The
+    generator must fail closed when the map cannot be created.
     """
-    required = (
+    required = [
         "更新日期：",
         "信息核验：",
         "本期重点：",
@@ -47,17 +52,23 @@ def validate_report_html(html: str, *, overview_title: str) -> None:
         "独立地图位置",
         "当前重点",
         overview_title,
-        "https://www.google.com/maps/search/?api=1&amp;query=",
         "Google Maps",
-    )
+        "border-radius:50%",
+    ]
+    if require_static_map:
+        required.extend(
+            [
+                "<img",
+                "maps.googleapis.com/maps/api/staticmap",
+                "在 Google Maps 中打开总览",
+            ]
+        )
+
     missing = [token for token in required if token not in html]
     if missing:
         raise ValueError("Email standard validation failed; missing: " + ", ".join(missing))
 
     forbidden = (
-        "maps.googleapis.com/maps/api/staticmap",
-        "cid:sales-map",
-        "cid:rental-map",
         "地图暂不可用",
         "本期新闻与市场更新",
     )
