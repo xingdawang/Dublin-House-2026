@@ -7,9 +7,13 @@ from pydantic import BaseModel, Field, HttpUrl
 
 
 SalesScheme = Literal[
+    "coming_soon",
     "affordable_purchase",
     "developer_new_build",
+    "sales_agent_new_build",
     "private_sale",
+    "price_change",
+    "planning_future",
     "market_watch",
 ]
 
@@ -49,6 +53,7 @@ class SalesListing(BaseModel):
             token in text
             for token in (
                 "sale agreed",
+                "offer accepted",
                 "sold",
                 "closed",
                 "deadline passed",
