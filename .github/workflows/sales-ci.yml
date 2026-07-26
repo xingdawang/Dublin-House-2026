@@ -1,0 +1,40 @@
+name: Sales Email CI
+
+on:
+  pull_request:
+    paths:
+      - "dublin_house/**"
+      - "templates/**"
+      - "tests/**"
+      - "data/sales_listings.json"
+      - ".github/workflows/sales-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-sales-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest -q
+      - name: Generate sales email preview
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: python scripts/run_sales.py
+      - name: Upload rendered preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: sales-email-preview
+          path: |
+            output/sales_report.html
+            output/sales_map.png
+          if-no-files-found: error
