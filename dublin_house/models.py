@@ -63,6 +63,16 @@ class SalesListing(BaseModel):
         )
 
 
+class SalesInsight(BaseModel):
+    section: SalesScheme
+    source: str
+    title: str
+    url: HttpUrl
+    summary: str
+    status: str = "最新市场资讯"
+    verified_at: str
+
+
 class RentalListing(BaseModel):
     source: str
     provider: str = ""
