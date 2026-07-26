@@ -63,6 +63,9 @@ def validate_report_html(
                 "maps.googleapis.com/maps/api/staticmap",
                 "在 Google Maps 中打开总览",
                 "border-radius:50%",
+                "地图颜色汇总",
+                "各颜色数量之和",
+                "市场资讯卡",
             ]
         )
 
@@ -70,12 +73,20 @@ def validate_report_html(
     if missing:
         raise ValueError("Email standard validation failed; missing: " + ", ".join(missing))
 
-    forbidden = (
+    forbidden = [
         "cid:sales-map",
         "cid:rental-map",
         "地图暂不可用",
         "本期新闻与市场更新",
-    )
+    ]
+    if require_static_map:
+        forbidden.extend(
+            [
+                "本期没有合适项目。",
+                "本期没有 Watchlist 项目。",
+            ]
+        )
+
     present = [token for token in forbidden if token in normalized_html]
     if present:
         raise ValueError("Email standard validation failed; obsolete format found: " + ", ".join(present))
