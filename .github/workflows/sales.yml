@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "0 7 * * *"
     - cron: "0 8 * * *"
+  push:
+    paths:
+      - "data/sales_listings.json"
 
 jobs:
   send-sales-email:
@@ -16,7 +19,7 @@ jobs:
         run: echo "hour=$(TZ=Europe/Dublin date +%H)" >> "$GITHUB_OUTPUT"
       - name: Check runtime data
         id: runtime_data
-        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || steps.local_time.outputs.hour == '08'
         run: |
           if test -f data/sales_listings.json; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
