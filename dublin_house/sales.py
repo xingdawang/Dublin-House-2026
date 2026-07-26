@@ -13,9 +13,13 @@ from .report_validation import validate_direct_url, validate_report_html
 
 SECTIONS = OrderedDict(
     [
+        ("coming_soon", ("🆕 Coming Soon · 未来 3 个月", "#0f766e")),
         ("affordable_purchase", ("Affordable Purchase", "blue")),
         ("developer_new_build", ("开发商新房", "purple")),
+        ("sales_agent_new_build", ("销售代理与新房平台", "#7c3aed")),
         ("private_sale", ("二手出售房 · 价格优先", "red")),
+        ("price_change", ("价格与状态变化", "#b45309")),
+        ("planning_future", ("Planning & Future Projects", "#475569")),
         ("market_watch", ("Watchlist", "gray")),
     ]
 )
@@ -36,20 +40,32 @@ def organize(rows: list[SalesListing]) -> dict[str, list[SalesListing]]:
 def build_sales_focus(buckets: dict[str, list[SalesListing]]) -> str:
     parts: list[str] = []
 
+    coming_soon = [item for item in buckets["coming_soon"] if not item.is_closed]
+    if coming_soon:
+        names = "、".join(item.title for item in coming_soon[:3])
+        parts.append(f"Coming Soon 重点跟踪 {names}")
+
     affordable = [item for item in buckets["affordable_purchase"] if not item.is_closed]
     if affordable:
         names = "、".join(item.title for item in affordable[:2])
         parts.append(f"{len(affordable)} 个 Affordable Purchase 项目正在开放或即将开放，重点包括 {names}")
 
-    new_builds = [item for item in buckets["developer_new_build"] if not item.is_closed]
+    new_builds = [
+        *[item for item in buckets["developer_new_build"] if not item.is_closed],
+        *[item for item in buckets["sales_agent_new_build"] if not item.is_closed],
+    ]
     if new_builds:
-        names = "、".join(item.title for item in new_builds[:3])
-        parts.append(f"开发商新房重点跟踪 {names}")
+        names = "、".join(item.title for item in new_builds[:4])
+        parts.append(f"开发商、销售代理和新房平台重点跟踪 {names}")
 
     private_sales = [item for item in buckets["private_sale"] if not item.is_closed and item.price_eur]
     if private_sales:
         cheapest = min(private_sales, key=lambda item: item.price_eur or 10**12)
         parts.append(f"二手房优先列出总价较低的 House，当前较低价选项为 {cheapest.title}（€{cheapest.price_eur:,}）")
+
+    changes = len(buckets["price_change"])
+    if changes:
+        parts.append(f"发现 {changes} 条价格或销售状态变化")
 
     watch_count = len(buckets["market_watch"])
     if watch_count:
@@ -106,7 +122,16 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
     buckets = organize(rows)
     sections, map_labels = build_sections_and_map_index(buckets)
     generated_at = dublin_now()
-    active_count = sum(len(buckets[key]) for key in ("affordable_purchase", "developer_new_build", "private_sale"))
+    active_keys = (
+        "coming_soon",
+        "affordable_purchase",
+        "developer_new_build",
+        "sales_agent_new_build",
+        "private_sale",
+        "price_change",
+        "planning_future",
+    )
+    active_count = sum(len(buckets[key]) for key in active_keys)
     map_overview_url = os.getenv("SALES_MAP_OVERVIEW_URL", SALES_MAP_OVERVIEW_URL)
 
     html = render(
