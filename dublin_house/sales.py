@@ -13,7 +13,7 @@ from .report_validation import validate_direct_url, validate_report_html
 
 SECTIONS = OrderedDict(
     [
-        ("coming_soon", ("Coming Soon · 未来 3 个月", "teal")),
+        ("coming_soon", ("Coming Soon · 未来 3 个月", "green")),
         ("affordable_purchase", ("Affordable Purchase", "blue")),
         ("developer_new_build", ("开发商新房", "purple")),
         ("sales_agent_new_build", ("销售代理与新房平台", "purple")),
