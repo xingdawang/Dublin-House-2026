@@ -79,11 +79,29 @@ jobs:
             output/sales_report.html
             output/sales_map.png
           if-no-files-found: error
-      - name: Send verified sales email once
+      - name: Send verified sales email once and capture output
+        id: send
         if: steps.tests.outputs.code == '0' && steps.generate.outputs.code == '0' && hashFiles('.github/send-sales-email') != ''
+        shell: bash
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-        run: python scripts/run_sales.py --send
+        run: |
+          set +e
+          python scripts/run_sales.py --send > send.log 2>&1
+          code=$?
+          cat send.log
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload send output
+        if: always() && hashFiles('.github/send-sales-email') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: send-output
+          path: send.log
+          if-no-files-found: error
+      - name: Stop when send fails
+        if: hashFiles('.github/send-sales-email') != '' && steps.send.outputs.code != '0'
+        run: exit 1
