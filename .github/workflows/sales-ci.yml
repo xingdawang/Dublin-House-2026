@@ -7,6 +7,7 @@ on:
       - "templates/**"
       - "tests/**"
       - "data/sales_listings.json"
+      - "data/sales_insights.json"
       - ".github/workflows/sales-ci.yml"
   workflow_dispatch:
 
