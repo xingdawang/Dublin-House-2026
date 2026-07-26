@@ -6,20 +6,20 @@ from pathlib import Path
 
 from .common import dublin_now, load_json_rows, output_dir
 from .emailer import render, send_html
-from .maps import LABELS
+from .maps import LABELS, MapPoint, create_map
 from .models import SalesListing
 from .report_validation import validate_direct_url, validate_report_html
 
 
 SECTIONS = OrderedDict(
     [
-        ("coming_soon", ("🆕 Coming Soon · 未来 3 个月", "#0f766e")),
+        ("coming_soon", ("Coming Soon · 未来 3 个月", "teal")),
         ("affordable_purchase", ("Affordable Purchase", "blue")),
         ("developer_new_build", ("开发商新房", "purple")),
-        ("sales_agent_new_build", ("销售代理与新房平台", "#7c3aed")),
+        ("sales_agent_new_build", ("销售代理与新房平台", "purple")),
         ("private_sale", ("二手出售房 · 价格优先", "red")),
-        ("price_change", ("价格与状态变化", "#b45309")),
-        ("planning_future", ("Planning & Future Projects", "#475569")),
+        ("price_change", ("价格与状态变化", "orange")),
+        ("planning_future", ("Planning & Future Projects", "gray")),
         ("market_watch", ("Watchlist", "gray")),
     ]
 )
@@ -56,20 +56,20 @@ def build_sales_focus(buckets: dict[str, list[SalesListing]]) -> str:
     ]
     if new_builds:
         names = "、".join(item.title for item in new_builds[:4])
-        parts.append(f"开发商、销售代理和新房平台重点跟踪 {names}")
+        parts.append(f"开发商及销售代理新房重点跟踪 {names}")
 
     private_sales = [item for item in buckets["private_sale"] if not item.is_closed and item.price_eur]
     if private_sales:
         cheapest = min(private_sales, key=lambda item: item.price_eur or 10**12)
         parts.append(f"二手房优先列出总价较低的 House，当前较低价选项为 {cheapest.title}（€{cheapest.price_eur:,}）")
 
-    changes = len(buckets["price_change"])
-    if changes:
-        parts.append(f"发现 {changes} 条价格或销售状态变化")
+    change_count = len(buckets["price_change"])
+    if change_count:
+        parts.append(f"另有 {change_count} 条价格或销售状态变化")
 
     watch_count = len(buckets["market_watch"])
     if watch_count:
-        parts.append(f"另有 {watch_count} 个项目列入 Watchlist")
+        parts.append(f"{watch_count} 个项目列入 Watchlist")
 
     return "；".join(parts) + "。" if parts else "暂无新的已核实更新，现有项目继续跟踪。"
 
@@ -97,6 +97,8 @@ def build_sections_and_map_index(
                         "title": item.title,
                         "address": item.address,
                         "color": color,
+                        "latitude": item.latitude,
+                        "longitude": item.longitude,
                     }
                 )
             rendered_items.append({"listing": item, "marker": marker})
@@ -122,17 +124,31 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
     buckets = organize(rows)
     sections, map_labels = build_sections_and_map_index(buckets)
     generated_at = dublin_now()
-    active_keys = (
-        "coming_soon",
-        "affordable_purchase",
-        "developer_new_build",
-        "sales_agent_new_build",
-        "private_sale",
-        "price_change",
-        "planning_future",
+    active_count = sum(
+        len(buckets[key])
+        for key in (
+            "coming_soon",
+            "affordable_purchase",
+            "developer_new_build",
+            "sales_agent_new_build",
+            "private_sale",
+        )
     )
-    active_count = sum(len(buckets[key]) for key in active_keys)
     map_overview_url = os.getenv("SALES_MAP_OVERVIEW_URL", SALES_MAP_OVERVIEW_URL)
+
+    map_points = [
+        MapPoint(
+            title=item["title"],
+            address=item["address"],
+            color=item["color"],
+            latitude=item.get("latitude"),
+            longitude=item.get("longitude"),
+        )
+        for item in map_labels
+    ]
+    map_result = create_map(map_points, output_dir() / "sales_map.png")
+    if map_result.error or not map_result.url or not map_result.image_path:
+        raise RuntimeError(f"Google Static Maps overview could not be created: {map_result.error or 'unknown error'}")
 
     html = render(
         "sales_report.html.j2",
@@ -144,12 +160,13 @@ def generate(*, send: bool = False, data_file: str | None = None) -> Path:
         focus_count=active_count,
         sections=sections,
         map_overview_url=map_overview_url,
+        google_static_map_url=map_result.url,
         map_labels=map_labels,
     )
     report_path = output_dir() / "sales_report.html"
     report_path.write_text(html, encoding="utf-8")
 
     if send:
-        validate_report_html(html, overview_title="所有房源位置总览")
+        validate_report_html(html, overview_title="所有房源位置总览", require_static_map=True)
         send_html(f"南都柏林住房销售｜{generated_at:%Y-%m-%d}", html)
     return report_path
