@@ -40,9 +40,11 @@ def validate_report_html(
 ) -> None:
     """Enforce the canonical housing-email layout.
 
-    Sales reports require a visible Google Static Maps image, the numbered
-    location index, summary cards, and individual Google Maps links. The
-    generator must fail closed when the map cannot be created.
+    Every report must include the summary cards, a Google Maps overview link,
+    a numbered location index, and individual Google Maps links. Sales reports
+    additionally require a visible Google Static Maps image and the coloured
+    circular marker legend. Validation fails closed when any required map
+    element is missing.
     """
     required = [
         "更新日期：",
@@ -52,8 +54,8 @@ def validate_report_html(
         "独立地图位置",
         "当前重点",
         overview_title,
+        "https://www.google.com/maps/search/?api=1&amp;query=",
         "Google Maps",
-        "border-radius:50%",
     ]
     if require_static_map:
         required.extend(
@@ -61,6 +63,7 @@ def validate_report_html(
                 "<img",
                 "maps.googleapis.com/maps/api/staticmap",
                 "在 Google Maps 中打开总览",
+                "border-radius:50%",
             ]
         )
 
@@ -69,6 +72,8 @@ def validate_report_html(
         raise ValueError("Email standard validation failed; missing: " + ", ".join(missing))
 
     forbidden = (
+        "cid:sales-map",
+        "cid:rental-map",
         "地图暂不可用",
         "本期新闻与市场更新",
     )
