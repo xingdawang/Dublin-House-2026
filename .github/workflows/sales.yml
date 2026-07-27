@@ -2,6 +2,9 @@ name: South Dublin Housing Sales
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/manual-run/sales"
   schedule:
     - cron: "0 7 * * *"
     - cron: "0 8 * * *"
@@ -13,12 +16,27 @@ jobs:
       PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
-      - name: Check Dublin local time
+      - name: Check intended Dublin schedule
         id: local_time
-        run: echo "hour=$(TZ=Europe/Dublin date +%H)" >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "push" ]]; then
+            echo "send_now=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          offset="$(TZ=Europe/Dublin date +%z)"
+          scheduled="${{ github.event.schedule }}"
+          if [[ "$offset" == "+0100" && "$scheduled" == "0 7 * * *" ]]; then
+            echo "send_now=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$offset" == "+0000" && "$scheduled" == "0 8 * * *" ]]; then
+            echo "send_now=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "send_now=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Check runtime data
         id: runtime_data
-        if: github.event_name == 'workflow_dispatch' || steps.local_time.outputs.hour == '08'
+        if: steps.local_time.outputs.send_now == 'true'
         run: |
           if test -f data/sales_listings.json && test -f data/sales_insights.json; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
