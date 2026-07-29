@@ -1,1 +1,1 @@
-2026-07-27补发：修复 GitHub Actions 延迟后按实际小时判断导致漏发的问题。
+2026-07-29 10:05 Europe/Dublin：手动重跑南都柏林住房销售日报，要求使用 GitHub Secrets、原始 sales_report.html.j2 模板和 Google Static Maps 图片。
