@@ -16,11 +16,7 @@ FORBIDDEN_PATH_PARTS = {
 
 
 def validate_direct_url(url: str, *, title: str) -> None:
-    """Reject home, search, category and regional-list pages.
-
-    Every primary CTA in the email must land on the concrete project or
-    listing page. Google Maps links are validated separately as location links.
-    """
+    """Reject home, search, category and regional-list pages."""
     parsed = urlparse(str(url))
     path = parsed.path.strip("/")
     if not parsed.scheme.startswith("http") or not parsed.netloc:
@@ -39,11 +35,7 @@ def validate_report_html(
     overview_title: str,
     require_static_map: bool = False,
 ) -> None:
-    """Enforce the canonical housing-email layout.
-
-    HTML entities are decoded before validation so both raw ``&query=`` links
-    and email-client-safe ``&amp;query=`` links are treated identically.
-    """
+    """Enforce the canonical housing-email layout for sales and rentals."""
     normalized_html = unescape(html)
     required = [
         "更新日期：",
@@ -55,6 +47,9 @@ def validate_report_html(
         overview_title,
         "https://www.google.com/maps/search/?api=1&query=",
         "Google Maps",
+        "<article",
+        "style=",
+        "border-radius",
     ]
     if require_static_map:
         required.extend(
@@ -65,7 +60,6 @@ def validate_report_html(
                 "border-radius:50%",
                 "地图颜色汇总",
                 "各颜色数量之和",
-                "市场资讯卡",
             ]
         )
 
@@ -80,12 +74,7 @@ def validate_report_html(
         "本期新闻与市场更新",
     ]
     if require_static_map:
-        forbidden.extend(
-            [
-                "本期没有合适项目。",
-                "本期没有 Watchlist 项目。",
-            ]
-        )
+        forbidden.extend(["本期没有合适项目。", "本期没有 Watchlist 项目。"])
 
     present = [token for token in forbidden if token in normalized_html]
     if present:
