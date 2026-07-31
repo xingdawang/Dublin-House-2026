@@ -1,31 +1,26 @@
 from __future__ import annotations
 
 from html import unescape
-from pathlib import PurePosixPath
 from urllib.parse import urlparse
 
 
-FORBIDDEN_PATH_PARTS = {
-    "search",
-    "results",
-    "properties",
-    "property-for-sale",
-    "houses-to-let",
-    "new-homes",
-}
-
-
 def validate_direct_url(url: str, *, title: str) -> None:
-    """Reject home, search, category and regional-list pages."""
+    """Reject home, search, category and regional-list pages while allowing concrete detail pages."""
     parsed = urlparse(str(url))
-    path = parsed.path.strip("/")
+    parts = [part.casefold() for part in parsed.path.strip("/").split("/") if part]
     if not parsed.scheme.startswith("http") or not parsed.netloc:
         raise ValueError(f"{title}: invalid URL")
-    if not path:
+    if not parts:
         raise ValueError(f"{title}: URL points to a site home page")
 
-    parts = {part.lower() for part in PurePosixPath(path).parts}
-    if parts & FORBIDDEN_PATH_PARTS and len(PurePosixPath(path).parts) <= 3:
+    first = parts[0]
+    if first in {"search", "results"}:
+        raise ValueError(f"{title}: URL appears to be a search page: {url}")
+    if first == "properties" and len(parts) < 2:
+        raise ValueError(f"{title}: URL appears to be a category page: {url}")
+    if first == "houses-to-let" and len(parts) < 3:
+        raise ValueError(f"{title}: URL appears to be a rental category page: {url}")
+    if first in {"property-for-sale", "new-homes"} and len(parts) <= 3:
         raise ValueError(f"{title}: URL appears to be a search/category page: {url}")
 
 
