@@ -7,7 +7,7 @@ from .common import dublin_now, load_json_rows, load_settings, output_dir
 from .emailer import render, send_html
 from .maps import LABELS, MapPoint, create_map
 from .models import CostRentalProject, RentalListing
-from .report_validation import validate_direct_url, validate_report_html
+from .report_validation import validate_direct_url, validate_live_rental_url, validate_report_html
 
 
 RENTAL_MAP_OVERVIEW_URL = "https://www.google.com/maps/search/?api=1&query=South+Dublin+rentals"
@@ -120,6 +120,8 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
     cost_projects = [CostRentalProject.model_validate(row) for row in load_json_rows(cost_path)]
     for item in rentals:
         validate_direct_url(str(item.url), title=item.display_title)
+        if send:
+            validate_live_rental_url(str(item.url), title=item.display_title)
     for item in cost_projects:
         validate_direct_url(str(item.url), title=item.title)
 
