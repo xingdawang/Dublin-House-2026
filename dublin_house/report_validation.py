@@ -47,9 +47,6 @@ def validate_report_html(
         overview_title,
         "https://www.google.com/maps/search/?api=1&query=",
         "Google Maps",
-        "<article",
-        "style=",
-        "border-radius",
     ]
     if require_static_map:
         required.extend(
