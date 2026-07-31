@@ -1,0 +1,54 @@
+[
+  {
+    "source": "Respond",
+    "provider": "Respond Housing Association",
+    "title": "Cronans Well, Mooretown",
+    "url": "https://www.respond.ie/properties/mooretown-swords/",
+    "address": "Cronans Well, Mooretown, Swords, Co. Dublin",
+    "rent_eur": 1654,
+    "bedrooms": 3,
+    "status": "Applications closed 27 July 2026",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Official page listed one three-bedroom house and a closing time of 11:00 on 27 July 2026. Retained for future phase monitoring only.",
+    "verified_at": "2026-07-31"
+  },
+  {
+    "source": "Tuath Housing",
+    "provider": "Tuath Housing",
+    "title": "Niven Oaks",
+    "url": "https://tuathhousing.ie/properties/niven-oaks-santry/",
+    "address": "Niven Oaks, Northwood, Santry, Co. Dublin",
+    "rent_eur": 1350,
+    "bedrooms": 1,
+    "status": "Applications closed",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Official page lists one-bedroom apartments from €1,350 and two-bedroom apartments from €1,585, but confirms applications are closed.",
+    "verified_at": "2026-07-31"
+  },
+  {
+    "source": "Tuath Housing",
+    "provider": "Tuath Housing",
+    "title": "Kilmartin Grove",
+    "url": "https://tuathhousing.ie/properties/kilmartin-grove/",
+    "address": "Kilmartin Grove, Dublin 15",
+    "rent_eur": 1226,
+    "bedrooms": 1,
+    "status": "Applications closed",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Official page lists one-bedroom apartments from €1,226 and confirms applications are now closed. Retained because the pricing remains a useful benchmark for later releases.",
+    "verified_at": "2026-07-31"
+  },
+  {
+    "source": "Respond",
+    "provider": "Respond Housing Association",
+    "title": "The Place, Seven Mills",
+    "url": "https://www.respond.ie/properties/the-place-seven-mills/",
+    "address": "The Place, Seven Mills, Dublin 22",
+    "rent_eur": 1836,
+    "bedrooms": 3,
+    "status": "Applications closed",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Official project page confirms applications are closed. Retained to monitor possible future releases in Seven Mills.",
+    "verified_at": "2026-07-31"
+  }
+]
