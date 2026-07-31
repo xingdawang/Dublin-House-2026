@@ -6,12 +6,14 @@ on:
     paths:
       - ".github/manual-run/rental"
   schedule:
-    - cron: "0 7 * * 1"
-    - cron: "0 8 * * 1"
+    - cron: "15 7 * * *"
+    - cron: "15 8 * * *"
 
 jobs:
   send-rental-email:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
       - name: Check intended Dublin schedule
@@ -25,9 +27,9 @@ jobs:
 
           offset="$(TZ=Europe/Dublin date +%z)"
           scheduled="${{ github.event.schedule }}"
-          if [[ "$offset" == "+0100" && "$scheduled" == "0 7 * * 1" ]]; then
+          if [[ "$offset" == "+0100" && "$scheduled" == "15 7 * * *" ]]; then
             echo "send_now=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$offset" == "+0000" && "$scheduled" == "0 8 * * 1" ]]; then
+          elif [[ "$offset" == "+0000" && "$scheduled" == "15 8 * * *" ]]; then
             echo "send_now=true" >> "$GITHUB_OUTPUT"
           else
             echo "send_now=false" >> "$GITHUB_OUTPUT"
@@ -59,4 +61,5 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: python scripts/run_rental.py --send
