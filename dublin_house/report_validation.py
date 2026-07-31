@@ -3,6 +3,8 @@ from __future__ import annotations
 from html import unescape
 from urllib.parse import urlparse
 
+import httpx
+
 
 def validate_direct_url(url: str, *, title: str) -> None:
     """Reject home, search, category and regional-list pages while allowing concrete detail pages."""
@@ -20,8 +22,36 @@ def validate_direct_url(url: str, *, title: str) -> None:
         raise ValueError(f"{title}: URL appears to be a category page: {url}")
     if first == "houses-to-let" and len(parts) < 3:
         raise ValueError(f"{title}: URL appears to be a rental category page: {url}")
-    if first in {"property-for-sale", "new-homes"} and len(parts) <= 3:
+    if first in {"property-for-rent", "property-for-sale", "new-homes"}:
         raise ValueError(f"{title}: URL appears to be a search/category page: {url}")
+
+
+def validate_live_rental_url(url: str, *, title: str) -> str:
+    """Follow redirects and confirm that a private-rental CTA still ends on a concrete listing page."""
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150 Safari/537.36"
+        )
+    }
+    response = httpx.get(str(url), headers=headers, timeout=30, follow_redirects=True)
+    if response.status_code >= 400:
+        raise ValueError(f"{title}: listing page returned HTTP {response.status_code}")
+
+    final_url = str(response.url)
+    validate_direct_url(final_url, title=title)
+    parsed = urlparse(final_url)
+    host = parsed.netloc.casefold().removeprefix("www.")
+    parts = [part.casefold() for part in parsed.path.strip("/").split("/") if part]
+
+    if host == "daft.ie":
+        if len(parts) < 3 or parts[0] != "for-rent" or not parts[-1].isdigit():
+            raise ValueError(f"{title}: Daft link does not resolve to a concrete rental listing")
+    elif host == "rent.ie":
+        if len(parts) < 3 or parts[0] != "houses-to-let" or not parts[-1].isdigit():
+            raise ValueError(f"{title}: Rent.ie link does not resolve to a concrete rental listing")
+
+    return final_url
 
 
 def validate_report_html(
