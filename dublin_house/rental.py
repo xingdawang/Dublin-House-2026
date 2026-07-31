@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .common import dublin_now, load_json_rows, load_settings, output_dir
 from .emailer import render, send_html
-from .maps import LABELS
+from .maps import LABELS, MapPoint, create_map
 from .models import CostRentalProject, RentalListing
 from .report_validation import validate_direct_url, validate_report_html
 
@@ -44,7 +44,14 @@ def select_and_rank(rows: list[RentalListing], settings: dict) -> list[dict]:
     ]
 
 
-def build_rental_focus(ranked: list[dict], cost_projects: list[CostRentalProject]) -> str:
+def _is_open_cost_rental(project: CostRentalProject) -> bool:
+    status = project.status.casefold()
+    return any(token in status for token in ("open", "available", "apply now", "applications open")) and not any(
+        token in status for token in ("closed", "ended", "application ended", "applications closed")
+    )
+
+
+def build_rental_focus(ranked: list[dict], open_cost: list[dict], watchlist: list[dict]) -> str:
     parts: list[str] = []
     if ranked:
         cheapest = min(ranked, key=lambda row: row["listing"].rent_eur)["listing"]
@@ -53,16 +60,18 @@ def build_rental_focus(ranked: list[dict], cost_projects: list[CostRentalProject
             f"本期核实 {len(ranked)} 套符合条件的私人整租，其中一居室 {one_bed_count} 套，"
             f"较低总租金选项为 {cheapest.title}（€{cheapest.rent_eur:,}/月）"
         )
-    if cost_projects:
-        names = "、".join(project.title for project in cost_projects[:3])
-        parts.append(f"Cost Rental 继续跟踪 {names} 的申请状态与公开条件")
+    if open_cost:
+        names = "、".join(row["project"].title for row in open_cost[:3])
+        parts.append(f"当前可申请 Cost Rental 重点包括 {names}")
+    elif watchlist:
+        parts.append("本期未核实到仍开放的 Cost Rental 项目，已结束项目仅保留在 Watchlist")
     return "；".join(parts) + "。" if parts else "暂无新的已核实更新，现有项目继续跟踪。"
 
 
 def build_rental_map_index(
     ranked: list[dict],
     cost_projects: list[CostRentalProject],
-) -> tuple[list[dict], list[dict]]:
+) -> tuple[list[dict], list[dict], list[dict]]:
     marker_by_address: dict[str, str] = {}
     map_labels: list[dict] = []
 
@@ -82,16 +91,17 @@ def build_rental_map_index(
         item = row["listing"]
         row["marker"] = assign_marker(item.title, item.address, "orange")
 
-    cost_rental: list[dict] = []
+    open_cost: list[dict] = []
+    watchlist: list[dict] = []
     for project in cost_projects:
-        cost_rental.append(
-            {
-                "project": project,
-                "marker": assign_marker(project.title, project.address, "green"),
-            }
-        )
+        open_now = _is_open_cost_rental(project)
+        row = {
+            "project": project,
+            "marker": assign_marker(project.title, project.address, "green" if open_now else "gray"),
+        }
+        (open_cost if open_now else watchlist).append(row)
 
-    return cost_rental, map_labels
+    return open_cost, watchlist, map_labels
 
 
 def _verification_period(hour: int) -> str:
@@ -114,28 +124,42 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
         validate_direct_url(str(item.url), title=item.title)
 
     ranked = select_and_rank(rentals, settings)
-    cost_rental, map_labels = build_rental_map_index(ranked, cost_projects)
+    open_cost, watchlist, map_labels = build_rental_map_index(ranked, cost_projects)
     generated_at = dublin_now()
     map_overview_url = os.getenv("RENTAL_MAP_OVERVIEW_URL", RENTAL_MAP_OVERVIEW_URL)
+
+    points = [
+        MapPoint(
+            title=item["title"],
+            address=item["address"],
+            color=item["color"],
+        )
+        for item in map_labels
+    ]
+    map_result = create_map(points, output_dir() / "rental_map.png")
+    if map_result.error or not map_result.url or map_result.image_path is None:
+        raise RuntimeError(f"Rental Google Static Maps generation failed: {map_result.error or 'unknown error'}")
 
     html = render(
         "rental_report.html.j2",
         updated_date=generated_at.strftime("%Y-%m-%d"),
         verified_label=f"{generated_at:%Y-%m-%d} {_verification_period(generated_at.hour)}",
-        focus_summary=build_rental_focus(ranked, cost_projects),
-        total_count=len(ranked) + len(cost_rental),
+        focus_summary=build_rental_focus(ranked, open_cost, watchlist),
+        total_count=len(ranked) + len(open_cost) + len(watchlist),
         location_count=len(map_labels),
-        focus_count=len(ranked),
+        focus_count=len(ranked) + len(open_cost),
         rentals=ranked,
-        cost_rental=cost_rental,
+        cost_rental=open_cost,
+        watchlist=watchlist,
         map_overview_url=map_overview_url,
+        google_static_map_url=map_result.url,
         map_labels=map_labels,
         sources=settings["rental"]["sources"],
     )
     report_path = output_dir() / "rental_report.html"
     report_path.write_text(html, encoding="utf-8")
 
+    validate_report_html(html, overview_title="所有出租位置总览", require_static_map=True)
     if send:
-        validate_report_html(html, overview_title="所有出租位置总览")
         send_html(f"南都柏林住房租赁｜{generated_at:%Y-%m-%d}", html)
     return report_path
