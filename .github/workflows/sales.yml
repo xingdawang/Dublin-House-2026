@@ -6,8 +6,8 @@ on:
     paths:
       - ".github/manual-run/sales"
   schedule:
+    - cron: "0 6 * * *"
     - cron: "0 7 * * *"
-    - cron: "0 8 * * *"
 
 jobs:
   send-sales-email:
@@ -27,9 +27,9 @@ jobs:
 
           offset="$(TZ=Europe/Dublin date +%z)"
           scheduled="${{ github.event.schedule }}"
-          if [[ "$offset" == "+0100" && "$scheduled" == "0 7 * * *" ]]; then
+          if [[ "$offset" == "+0100" && "$scheduled" == "0 6 * * *" ]]; then
             echo "send_now=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$offset" == "+0000" && "$scheduled" == "0 8 * * *" ]]; then
+          elif [[ "$offset" == "+0000" && "$scheduled" == "0 7 * * *" ]]; then
             echo "send_now=true" >> "$GITHUB_OUTPUT"
           else
             echo "send_now=false" >> "$GITHUB_OUTPUT"
