@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Dublin House 2026 · 运行时架构",
+    "subtitle": "南都柏林住房销售日报与租赁周报的生成、校验、地图和邮件发送链路",
+    "output": "dublin-house-2026.architecture.html",
+    "animation": "none",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "viewBox": [1400, 760],
+    "repository": {
+      "url": "https://github.com/xingdawang/Dublin-House-2026",
+      "revision": "e3f690591c895a93824cd9264824f7bc183fbad3"
+    },
+    "views": [
+      {
+        "id": "sales-path",
+        "label": "销售日报路径",
+        "focus": ["scheduler", "sales-data", "sales-pipeline", "shared-gate", "report-builder", "html-output", "smtp", "recipient"],
+        "note": "每日任务从销售数据进入销售流水线，通过统一门禁后生成并发送 HTML 邮件。"
+      },
+      {
+        "id": "rental-path",
+        "label": "租赁周报路径",
+        "focus": ["scheduler", "rental-data", "rental-pipeline", "shared-gate", "report-builder", "html-output", "smtp", "recipient"],
+        "note": "每周任务会先重试核验实时房源链接，剔除失效条目，再进入统一报告链路。"
+      },
+      {
+        "id": "delivery-gate",
+        "label": "发送门禁",
+        "focus": ["shared-core", "shared-gate", "google-maps", "report-builder", "html-output", "smtp"],
+        "note": "模型、链接、模板、静态地图和 SMTP 登录必须全部通过，正式发送才会继续。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "scheduler",
+      "type": "cloud",
+      "label": "GitHub Actions",
+      "sublabel": "定时与手动触发",
+      "tag": "Europe/Dublin",
+      "pos": [40, 330],
+      "size": [160, 72],
+      "sources": [
+        { "path": ".github/workflows/sales.yml", "label": "销售任务" },
+        { "path": ".github/workflows/rental.yml", "label": "租赁任务" }
+      ]
+    },
+    {
+      "id": "sales-data",
+      "type": "database",
+      "label": "销售数据",
+      "sublabel": "房源 + 市场洞察 JSON",
+      "pos": [40, 100],
+      "size": [160, 72]
+    },
+    {
+      "id": "rental-data",
+      "type": "database",
+      "label": "租赁数据",
+      "sublabel": "私人整租 + Cost Rental",
+      "pos": [40, 560],
+      "size": [160, 72]
+    },
+    {
+      "id": "sales-pipeline",
+      "type": "backend",
+      "label": "销售流水线",
+      "sublabel": "分类、排序、重点摘要",
+      "pos": [290, 100],
+      "size": [180, 76],
+      "sources": [
+        { "path": "scripts/run_sales.py", "label": "命令入口" },
+        { "path": "dublin_house/sales.py", "label": "销售生成逻辑" }
+      ]
+    },
+    {
+      "id": "rental-pipeline",
+      "type": "backend",
+      "label": "租赁流水线",
+      "sublabel": "链接重试、筛选与评分",
+      "pos": [290, 556],
+      "size": [180, 76],
+      "sources": [
+        { "path": "scripts/run_rental.py", "label": "命令入口" },
+        { "path": "dublin_house/rental.py", "label": "租赁生成逻辑" }
+      ]
+    },
+    {
+      "id": "shared-core",
+      "type": "backend",
+      "label": "共享领域核心",
+      "sublabel": "模型、设置与 Dublin 时间",
+      "pos": [290, 330],
+      "size": [180, 76],
+      "sources": [
+        { "path": "dublin_house/models.py", "label": "Pydantic 模型" },
+        { "path": "dublin_house/common.py", "label": "共享工具" }
+      ]
+    },
+    {
+      "id": "shared-gate",
+      "type": "security",
+      "label": "统一预检门禁",
+      "sublabel": "数据、链接、模板、SMTP",
+      "tag": "fail closed",
+      "pos": [550, 330],
+      "size": [180, 76],
+      "sources": [
+        { "path": "dublin_house/report_validation.py", "label": "报告与链接校验" },
+        { "path": "dublin_house/emailer.py", "label": "SMTP 预检" }
+      ]
+    },
+    {
+      "id": "google-maps",
+      "type": "external",
+      "label": "Google Static Maps",
+      "sublabel": "标记、总览图与地图链接",
+      "pos": [790, 92],
+      "size": [180, 76],
+      "sources": [
+        { "path": "dublin_house/maps.py", "label": "地图生成" }
+      ]
+    },
+    {
+      "id": "report-builder",
+      "type": "backend",
+      "label": "HTML 报告生成器",
+      "sublabel": "Jinja 模板 + 邮件标准",
+      "pos": [790, 330],
+      "size": [180, 76],
+      "sources": [
+        { "path": "dublin_house/emailer.py", "label": "模板渲染" },
+        { "path": "templates/sales_report.html.j2", "label": "销售模板" },
+        { "path": "templates/rental_report.html.j2", "label": "租赁模板" }
+      ]
+    },
+    {
+      "id": "html-output",
+      "type": "database",
+      "label": "已验证报告产物",
+      "sublabel": "HTML + 静态地图 PNG",
+      "pos": [1030, 330],
+      "size": [170, 76]
+    },
+    {
+      "id": "smtp",
+      "type": "external",
+      "label": "Gmail SMTP",
+      "sublabel": "STARTTLS + App Password",
+      "pos": [1030, 556],
+      "size": [170, 76],
+      "sources": [
+        { "path": "dublin_house/emailer.py", "label": "邮件发送" }
+      ]
+    },
+    {
+      "id": "recipient",
+      "type": "external",
+      "label": "邮件收件人",
+      "sublabel": "销售日报 / 租赁周报",
+      "pos": [1250, 556],
+      "size": [120, 76]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Dublin-House-2026 · Python Runtime",
+      "wraps": ["sales-pipeline", "rental-pipeline", "shared-core", "shared-gate", "report-builder", "html-output"],
+      "pad": 28
+    }
+  ],
+  "connections": [
+    { "id": "schedule-sales", "from": "scheduler", "to": "sales-pipeline", "label": "每日", "variant": "emphasis" },
+    { "id": "schedule-rental", "from": "scheduler", "to": "rental-pipeline", "label": "每周一", "variant": "emphasis" },
+    { "id": "sales-input", "from": "sales-data", "to": "sales-pipeline" },
+    { "id": "rental-input", "from": "rental-data", "to": "rental-pipeline" },
+    { "id": "core-to-sales", "from": "shared-core", "to": "sales-pipeline", "variant": "dashed" },
+    { "id": "core-to-rental", "from": "shared-core", "to": "rental-pipeline", "variant": "dashed" },
+    { "id": "sales-to-gate", "from": "sales-pipeline", "to": "shared-gate" },
+    { "id": "rental-to-gate", "from": "rental-pipeline", "to": "shared-gate" },
+    { "id": "core-to-gate", "from": "shared-core", "to": "shared-gate", "variant": "security" },
+    { "id": "gate-to-report", "from": "shared-gate", "to": "report-builder", "label": "通过" },
+    { "id": "maps-to-report", "from": "google-maps", "to": "report-builder", "label": "地图图像", "labelDy": 24 },
+    { "id": "report-to-output", "from": "report-builder", "to": "html-output" },
+    { "id": "output-to-smtp", "from": "html-output", "to": "smtp", "label": "HTML 邮件", "labelDy": 24 },
+    { "id": "smtp-to-recipient", "from": "smtp", "to": "recipient", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "两条独立任务",
+      "items": [
+        "销售：每日运行，重点覆盖 Affordable、新房、二手房与 Watchlist",
+        "租赁：每周一运行，优先整租、一居室和仍开放的 Cost Rental"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "发送前必须通过",
+      "items": [
+        "运行时数据存在且模型校验成功",
+        "详情链接、摘要、Google Maps 总览和独立地图链接有效",
+        "SMTP 凭据可登录；任一检查失败即停止发送"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "共享基础设施",
+      "items": [
+        "统一 Jinja 邮件版式与报告验证规则",
+        "Google Static Maps 失败会重试且不会产生可发送报告",
+        "销售和租赁共享邮件发送、输出目录与 Dublin 时区处理"
+      ]
+    }
+  ]
+}

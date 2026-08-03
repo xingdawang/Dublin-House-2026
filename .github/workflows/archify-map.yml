@@ -1,0 +1,81 @@
+name: Build Archify Runtime Map
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/archify-runtime-map
+    paths:
+      - "docs/architecture/dublin-house-2026.architecture.json"
+      - ".github/workflows/archify-map.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/architecture/dublin-house-2026.architecture.json"
+      - ".github/workflows/archify-map.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-architecture-map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/archify-runtime-map
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Fetch pinned Archify v2.13.0
+        run: |
+          git clone --depth 1 https://github.com/tt-a1i/archify.git /tmp/archify
+          git -C /tmp/archify fetch --depth 1 origin 2c1f8ac2ca28a26d0b68043ec80c9554e20ff0e3
+          git -C /tmp/archify checkout 2c1f8ac2ca28a26d0b68043ec80c9554e20ff0e3
+
+      - name: Archify doctor
+        run: node /tmp/archify/archify/bin/archify.mjs doctor
+
+      - name: Validate showcase architecture
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p docs/architecture
+          node /tmp/archify/archify/bin/archify.mjs validate \
+            architecture \
+            docs/architecture/dublin-house-2026.architecture.json \
+            --repo-root . \
+            --quality showcase \
+            --json | tee docs/architecture/dublin-house-2026.validation.json
+
+      - name: Deliver interactive HTML
+        shell: bash
+        run: |
+          set -o pipefail
+          node /tmp/archify/archify/bin/archify.mjs deliver \
+            architecture \
+            docs/architecture/dublin-house-2026.architecture.json \
+            docs/architecture/dublin-house-2026.architecture.html \
+            --repo-root . \
+            --quality showcase \
+            --json | tee docs/architecture/dublin-house-2026.delivery.json
+
+      - name: Commit checked artifact and receipts
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            docs/architecture/dublin-house-2026.architecture.html \
+            docs/architecture/dublin-house-2026.validation.json \
+            docs/architecture/dublin-house-2026.delivery.json
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git commit -m "Generate Archify runtime architecture"
+            git push origin HEAD:agent/archify-runtime-map
+          fi

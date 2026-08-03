@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/runner/work/Dublin-House-2026/Dublin-House-2026/docs/architecture/dublin-house-2026.architecture.json",
+  "output": "/home/runner/work/Dublin-House-2026/Dublin-House-2026/docs/architecture/dublin-house-2026.architecture.html",
+  "specification": {
+    "sha256": "348aed9fd8fd16297236ed439858857f0b459637cab5cfd603396e37cc7ea6c4",
+    "bytes": 7907
+  },
+  "artifact": {
+    "sha256": "a9f733247c8771ee634c3f9bd56a4b9cb134ab9aeb2b0f2f0a1a3504caf92202",
+    "bytes": 620422
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "evidence": {
+    "verified": true,
+    "repository": "https://github.com/xingdawang/Dublin-House-2026",
+    "revision": "e3f690591c895a93824cd9264824f7bc183fbad3",
+    "references": 15
+  }
+}
