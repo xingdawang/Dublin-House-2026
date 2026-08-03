@@ -6,8 +6,8 @@ on:
     paths:
       - ".github/manual-run/rental"
   schedule:
-    - cron: "0 6 * * 1"
-    - cron: "0 7 * * 1"
+    - cron: "7 7 * * 1"
+      timezone: "Europe/Dublin"
 
 jobs:
   send-rental-email:
@@ -16,27 +16,8 @@ jobs:
       PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
-      - name: Check intended Dublin schedule
-        id: local_time
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "push" ]]; then
-            echo "send_now=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          offset="$(TZ=Europe/Dublin date +%z)"
-          scheduled="${{ github.event.schedule }}"
-          if [[ "$offset" == "+0100" && "$scheduled" == "0 6 * * 1" ]]; then
-            echo "send_now=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$offset" == "+0000" && "$scheduled" == "0 7 * * 1" ]]; then
-            echo "send_now=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "send_now=false" >> "$GITHUB_OUTPUT"
-          fi
       - name: Check runtime data
         id: runtime_data
-        if: steps.local_time.outputs.send_now == 'true'
         run: |
           if test -f data/private_rentals.json && test -f data/cost_rental.json; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
