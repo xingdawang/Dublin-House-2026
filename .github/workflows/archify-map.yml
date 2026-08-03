@@ -8,6 +8,12 @@ on:
     paths:
       - "docs/architecture/dublin-house-2026.architecture.json"
       - ".github/workflows/archify-map.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/architecture/dublin-house-2026.architecture.json"
+      - ".github/workflows/archify-map.yml"
 
 permissions:
   contents: write
@@ -52,6 +58,7 @@ jobs:
             --json | tee docs/architecture/dublin-house-2026.delivery.json
 
       - name: Commit checked artifact and receipts
+        if: github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
