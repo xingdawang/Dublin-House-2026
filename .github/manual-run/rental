@@ -1,1 +1,1 @@
-2026-07-31 retry: rental workflow after direct-link validation fix.
+2026-08-03 08:50 Europe/Dublin：修复计划任务可靠性后，重新生成并补发本周南都柏林住房租赁周报。使用 GitHub Secrets、当前标准模板、Google Static Maps 总览和现有已核验租赁数据。
