@@ -1,1 +1,1 @@
-2026-08-01 08:29 Europe/Dublin：重新生成并补发当天南都柏林住房销售日报。使用 GitHub Secrets、当前标准模板、Google Static Maps 总览和现有已核验销售数据。
+2026-08-03 08:50 Europe/Dublin：修复计划任务可靠性后，重新生成并补发当天南都柏林住房销售日报。使用 GitHub Secrets、当前标准模板、Google Static Maps 总览和现有已核验销售数据。
