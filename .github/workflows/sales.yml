@@ -24,20 +24,24 @@ jobs:
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "sales_listings.json or sales_insights.json is not present; no email will be sent."
+            exit 1
           fi
       - uses: actions/setup-python@v5
-        if: steps.runtime_data.outputs.ready == 'true'
         with:
           python-version: "3.12"
           cache: pip
       - name: Install dependencies
-        if: steps.runtime_data.outputs.ready == 'true'
         run: pip install -r requirements.txt
       - name: Test
-        if: steps.runtime_data.outputs.ready == 'true'
         run: pytest -q
+      - name: Preflight email
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: python scripts/run_sales.py --preflight
       - name: Generate and send
-        if: steps.runtime_data.outputs.ready == 'true'
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
