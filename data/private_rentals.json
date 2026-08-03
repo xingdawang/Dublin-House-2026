@@ -19,35 +19,18 @@
   {
     "source": "Daft.ie",
     "provider": "Comer Group Ireland",
-    "title": "Island Key development",
+    "title": "Island Key development one-bedroom availability",
     "url": "https://www.daft.ie/for-rent/island-key-east-road-east-wall-co-dublin/2614723",
     "address": "Island Key, East Road, East Wall, Dublin 3",
     "district": "Dublin 3",
-    "rent_eur": 2450,
-    "bedrooms": 2,
-    "bathrooms": 2,
-    "property_type": "Apartment",
-    "whole_unit": true,
-    "status": "available",
-    "lease_term": "Contact agent",
-    "notes": "Current Daft development page shows two-bedroom availability from €2,450 per month near the Docklands, Luas and Docklands train station.",
-    "verified_at": "2026-08-03"
-  },
-  {
-    "source": "Rent.ie",
-    "provider": "Buckley Real Estate",
-    "title": "Dorset Street Lower one-bedroom apartment",
-    "url": "https://www.rent.ie/houses-to-let/Dorset-Street-Lower-Dublin-1-Dublin-1/6616370/",
-    "address": "Dorset Street Lower, Dublin 1",
-    "district": "Dublin 1",
-    "rent_eur": 2000,
+    "rent_eur": 1950,
     "bedrooms": 1,
     "bathrooms": 1,
     "property_type": "Apartment",
     "whole_unit": true,
     "status": "available",
-    "lease_term": "Minimum 1 Year",
-    "notes": "Walking distance to the city centre, nearby Luas and numerous bus routes; listing states current availability.",
-    "verified_at": "2026-07-31"
+    "lease_term": "Contact agent through Daft",
+    "notes": "Current Daft development page shows one-bedroom availability from €1,950 per month near the Docklands, Luas and Docklands train station.",
+    "verified_at": "2026-08-03"
   }
 ]
