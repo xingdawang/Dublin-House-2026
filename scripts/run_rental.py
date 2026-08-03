@@ -1,19 +1,56 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from dotenv import load_dotenv
 
-from dublin_house.common import load_json_rows
-from dublin_house.emailer import validate_smtp_connection
+from dublin_house.common import dublin_now, load_json_rows, output_dir
+from dublin_house.emailer import send_html, validate_smtp_connection
 from dublin_house.models import RentalListing
 from dublin_house.rental import generate
 from dublin_house.report_validation import validate_live_rental_url
+
+
+def prepare_live_rentals(path: str) -> Path:
+    valid_rows: list[dict] = []
+    failures: list[str] = []
+
+    for raw in load_json_rows(path):
+        item = RentalListing.model_validate(raw)
+        last_error: Exception | None = None
+        for attempt in range(1, 4):
+            try:
+                validate_live_rental_url(str(item.url), title=item.display_title)
+                valid_rows.append(raw)
+                last_error = None
+                break
+            except Exception as exc:  # noqa: BLE001 - preserve per-listing diagnostics
+                last_error = exc
+                if attempt < 3:
+                    time.sleep(attempt * 2)
+        if last_error is not None:
+            message = f"Skipping unavailable rental listing {item.display_title}: {last_error}"
+            print(f"::warning::{message}")
+            failures.append(message)
+
+    if not valid_rows:
+        details = "\n".join(failures) if failures else "No rental rows were available."
+        raise RuntimeError("Rental preflight found no live private listings.\n" + details)
+
+    prepared_path = output_dir() / "validated_private_rentals.json"
+    prepared_path.write_text(
+        json.dumps(valid_rows, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(f"Rental live-link preflight retained {len(valid_rows)} listing(s); skipped {len(failures)}.")
+    return prepared_path
 
 
 if __name__ == "__main__":
@@ -31,19 +68,23 @@ if __name__ == "__main__":
         parser.error("--send and --preflight cannot be used together")
 
     load_dotenv()
-    if args.preflight:
-        rental_path = args.rental_file or os.getenv("RENTAL_DATA_FILE", "data/private_rentals.json")
-        rentals = [RentalListing.model_validate(row) for row in load_json_rows(rental_path)]
-        for item in rentals:
-            validate_live_rental_url(str(item.url), title=item.display_title)
+    rental_path = args.rental_file or os.getenv("RENTAL_DATA_FILE", "data/private_rentals.json")
+    prepared_path: Path | None = None
+    if args.preflight or args.send:
+        prepared_path = prepare_live_rentals(rental_path)
 
     report_path = generate(
-        send=args.send,
-        rental_file=args.rental_file,
+        send=False,
+        rental_file=str(prepared_path) if prepared_path else args.rental_file,
         cost_rental_file=args.cost_rental_file,
     )
+    html = report_path.read_text(encoding="utf-8")
+
     if args.preflight:
         validate_smtp_connection()
         print(f"Rental email preflight passed: {report_path}")
+    elif args.send:
+        send_html(f"南都柏林住房租赁｜{dublin_now():%Y-%m-%d}", html)
+        print(f"Rental email sent: {report_path}")
     else:
         print(report_path)
