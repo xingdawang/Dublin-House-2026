@@ -182,7 +182,7 @@
     { "id": "core-to-rental", "from": "shared-core", "to": "rental-pipeline", "variant": "dashed" },
     { "id": "sales-to-gate", "from": "sales-pipeline", "to": "shared-gate" },
     { "id": "rental-to-gate", "from": "rental-pipeline", "to": "shared-gate" },
-    { "id": "core-to-gate", "from": "shared-core", "to": "shared-gate", "label": "规则与模型", "variant": "security", "labelDy": 28 },
+    { "id": "core-to-gate", "from": "shared-core", "to": "shared-gate", "variant": "security" },
     { "id": "gate-to-report", "from": "shared-gate", "to": "report-builder", "label": "通过" },
     { "id": "maps-to-report", "from": "google-maps", "to": "report-builder", "label": "地图图像", "labelDy": 24 },
     { "id": "report-to-output", "from": "report-builder", "to": "html-output" },
