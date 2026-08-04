@@ -38,9 +38,9 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "每日来源刷新：新增 4，变化 14",
+    "title": "每日来源刷新：新增 0，变化 3",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses",
-    "summary": "本轮检查 16 个页面，成功核验 20 个。新增：83 Alpine Heights, Clondalkin, Dublin 22、22 Monksfield Lawn, Dublin 22, Clondalkin, Dublin 22, D22HY76、23 Woodford View, Clondalkin, Dublin 22, D22FF67、33 Monastery Gate Avenue, Clondalkin, Dublin 22；变化：14 Foxdene Drive: property_type 'End of Terrace' → 'Apartment'；14 Foxdene Drive: status 'Sold' → 'Current Listing'；17 Saint Ronan's Way, Clondalkin, Dublin 22, D22Y5W5: property_type 'End of Terrace' → 'Terrace'；17 Saint Ronan's Way, Clondalkin, Dublin 22, D22Y5W5: status 'Sold' → 'Current Listing'；53 Kilcronan Avenue: status 'Sold' → 'Current Listing'；6 Wheatfield Park, Clondalkin, Dublin 22: property_type 'End of Terrace' → 'Semi-D'；6 Wheatfield Park, Clondalkin, Dublin 22: status 'Sold' → 'Current Listing'；12 Woodford Parade, Dublin 22, Clondalkin, Dublin 22, D22V4X5: property_type 'End of Terrace' → 'Semi-D'。",
+    "summary": "本轮检查 20 个页面，成功核验 21 个。新增：无新增入选房源；变化：14 Foxdene Drive: property_type 'Apartment' → 'Terraced House'；6 Wheatfield Park, Clondalkin, Dublin 22: property_type 'Semi-D' → 'House'；16 Woodford Road, Clondalkin, Dublin 22: property_type 'Apartment' → 'House'。",
     "status": "自动刷新结果",
     "verified_at": "2026-08-04"
   }
