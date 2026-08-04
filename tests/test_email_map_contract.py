@@ -4,7 +4,7 @@ import base64
 
 import pytest
 
-from dublin_house.emailer import validate_inline_images
+from dublin_house.emailer import resolve_inline_images, validate_inline_images
 from dublin_house.report_validation import validate_report_html
 
 
@@ -56,6 +56,19 @@ def test_canonical_map_contract_accepts_valid_inline_png(tmp_path, cid: str, ove
 
     assert validated[cid][0] == image_path
     assert validated[cid][1] == PNG_1X1
+
+
+@pytest.mark.parametrize(
+    ("cid", "expected_name"),
+    [("sales-map", "sales_map.png"), ("rental-map", "rental_map.png")],
+)
+def test_canonical_map_attachment_is_resolved_from_cid(cid: str, expected_name: str):
+    html = f'<img src="cid:{cid}">'
+
+    images = resolve_inline_images(html)
+
+    assert images[cid].name == expected_name
+    assert images[cid].parent.name == "output"
 
 
 def test_remote_google_static_map_url_is_rejected():
