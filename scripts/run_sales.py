@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dotenv import load_dotenv
 
 from dublin_house.common import dublin_now, load_json_rows
-from dublin_house.emailer import send_html, validate_smtp_connection
+from dublin_house.emailer import send_html, validate_inline_images, validate_smtp_connection
 from dublin_house.report_validation import validate_report_html
 from dublin_house.sales import generate
 
@@ -59,7 +59,13 @@ if __name__ == "__main__":
     html = _apply_verification_label(report_path, _verification_label(data_file, insights_file))
 
     if args.preflight or args.send:
-        validate_report_html(html, overview_title="所有房源位置总览", require_static_map=True)
+        validate_report_html(
+            html,
+            overview_title="所有房源位置总览",
+            require_static_map=True,
+            map_cid="sales-map",
+        )
+        validate_inline_images(html)
         validate_smtp_connection()
     if args.send:
         subject = f"南都柏林住房销售｜{dublin_now():%Y-%m-%d}"
