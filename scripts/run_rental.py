@@ -12,10 +12,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dotenv import load_dotenv
 
 from dublin_house.common import dublin_now, load_json_rows, output_dir
-from dublin_house.emailer import send_html, validate_smtp_connection
+from dublin_house.emailer import send_html, validate_inline_images, validate_smtp_connection
 from dublin_house.models import RentalListing
 from dublin_house.rental import generate
-from dublin_house.report_validation import validate_live_rental_url
+from dublin_house.report_validation import validate_live_rental_url, validate_report_html
 
 
 def prepare_live_rentals(path: str) -> Path:
@@ -80,11 +80,21 @@ if __name__ == "__main__":
     )
     html = report_path.read_text(encoding="utf-8")
 
-    if args.preflight:
+    if args.preflight or args.send:
+        validate_report_html(
+            html,
+            overview_title="所有出租位置总览",
+            require_static_map=True,
+            map_cid="rental-map",
+        )
+        validate_inline_images(html)
         validate_smtp_connection()
+
+    if args.preflight:
         print(f"Rental email preflight passed: {report_path}")
     elif args.send:
-        send_html(f"南都柏林住房租赁｜{dublin_now():%Y-%m-%d}", html)
-        print(f"Rental email sent: {report_path}")
+        subject = f"南都柏林住房租赁｜{dublin_now():%Y-%m-%d}"
+        send_html(subject, html)
+        print(f"Rental email sent: {subject}")
     else:
         print(report_path)
