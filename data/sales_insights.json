@@ -34,5 +34,14 @@
     "status": "Watchlist 更新",
     "summary": "Canal Bank 的申请入口目前已关闭，SDCC 正按收到顺序及 Scheme of Priority 进行评估。该项目继续保留在 Watchlist，用于跟踪评估结果、候补进展以及 Clonburris 后续批次。",
     "verified_at": "2026-07-26"
+  },
+  {
+    "section": "price_change",
+    "source": "Automated sales refresh",
+    "title": "每日来源刷新：新增 6，变化 4",
+    "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses",
+    "summary": "本轮检查 10 个页面，成功核验 16 个。新增：17 Saint Ronan's Way, Clondalkin, Dublin 22, D22Y5W5、6 Wheatfield Park, Clondalkin, Dublin 22、12 Woodford Parade, Dublin 22, Clondalkin, Dublin 22, D22V4X5、16 Woodford Road, Clondalkin, Dublin 22、318 Palmerstown Woods, Clondalkin, Dublin 22、44 Boot Road, Clondalkin, Dublin 22, D22X7F7；变化：14 Foxdene Drive: property_type 'Terraced House' → 'End of Terrace'；14 Foxdene Drive: status 'Current Listing' → 'Sold'；53 Kilcronan Avenue: property_type 'End of Terrace House' → 'End of Terrace'；53 Kilcronan Avenue: status 'Offers in Progress' → 'Sold'。",
+    "status": "自动刷新结果",
+    "verified_at": "2026-08-04"
   }
 ]
