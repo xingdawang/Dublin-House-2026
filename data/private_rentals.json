@@ -1,7 +1,7 @@
 [
   {
     "source": "Rent.ie",
-    "provider": "Direct landlord listing",
+    "provider": "Direct listing",
     "title": "Summer Hill one-bedroom apartment",
     "url": "https://www.rent.ie/houses-to-let/Summer-Hill-Dublin-1/6602107/",
     "address": "Summer Hill, Dublin 1, Co. Dublin",
@@ -13,8 +13,8 @@
     "whole_unit": true,
     "status": "available",
     "lease_term": "Minimum 1 Year",
-    "notes": "Own entrance, furnished, walking distance to O'Connell Street and multiple bus routes; listing states availability from 1 July 2026.",
-    "verified_at": "2026-08-03"
+    "notes": "Own entrance, furnished, close to O'Connell Street and multiple bus routes.",
+    "verified_at": "2026-08-04"
   },
   {
     "source": "Daft.ie",
@@ -30,7 +30,7 @@
     "whole_unit": true,
     "status": "available",
     "lease_term": "Contact agent through Daft",
-    "notes": "Current Daft development page shows one-bedroom availability from €1,950 per month near the Docklands, Luas and Docklands train station.",
-    "verified_at": "2026-08-03"
+    "notes": "Development listing near the Docklands, Luas and Docklands train station.",
+    "verified_at": "2026-08-04"
   }
 ]
