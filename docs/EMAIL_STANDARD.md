@@ -48,6 +48,8 @@
 
 - 运行时使用 `GOOGLE_MAPS_API_KEY` 调用 Google Static Maps。
 - 返回结果必须是 HTTP 200、图片 Content-Type 且内容非空。
+- 超过 15 个字符串地址点位时，必须先把超出部分解析为 Dublin 经纬度；不得删减地图点位。
+- 响应包含任何 `X-Staticmap-API-Warning` 时必须停止，错误提示 PNG 不得通过预检。
 - 图片保存为：
   - 销售：`output/sales_map.png`
   - 租赁：`output/rental_map.png`

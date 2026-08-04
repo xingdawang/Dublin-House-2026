@@ -4,7 +4,8 @@ import base64
 
 import pytest
 
-from dublin_house.emailer import resolve_inline_images, validate_inline_images
+from dublin_house import emailer
+from dublin_house.emailer import resolve_inline_images, send_html, validate_inline_images
 from dublin_house.report_validation import validate_report_html
 
 
@@ -91,3 +92,49 @@ def test_missing_cid_attachment_fails_closed():
 
     with pytest.raises(ValueError, match="Missing inline image attachments"):
         validate_inline_images(html, {})
+
+
+def test_send_html_builds_related_message_with_content_id(monkeypatch, tmp_path):
+    image_path = tmp_path / "sales_map.png"
+    image_path.write_bytes(PNG_1X1)
+    sent_messages = []
+
+    class FakeSMTP:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def ehlo(self):
+            return None
+
+        def starttls(self):
+            return None
+
+        def login(self, *_args):
+            return None
+
+        def send_message(self, message):
+            sent_messages.append(message)
+
+    monkeypatch.setattr(
+        emailer,
+        "_email_settings",
+        lambda: ("sender@example.com", "password", "to@example.com", "smtp.example.com", 587),
+    )
+    monkeypatch.setattr(emailer.smtplib, "SMTP", FakeSMTP)
+
+    send_html(
+        "Canonical map",
+        '<html><body><img src="cid:sales-map"></body></html>',
+        inline_images={"sales-map": image_path},
+    )
+
+    assert len(sent_messages) == 1
+    message = sent_messages[0]
+    assert message.get_content_type() == "multipart/related"
+    assert [part["Content-ID"] for part in message.walk() if part["Content-ID"]] == ["<sales-map>"]
