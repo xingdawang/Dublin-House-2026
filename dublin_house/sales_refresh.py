@@ -23,22 +23,20 @@ PRICE_RE = re.compile(r"€\s*([0-9][0-9,]{4,})")
 BED_RE = re.compile(r"\b(\d+)\s*Bed\b", re.IGNORECASE)
 BATH_RE = re.compile(r"\b(\d+)\s*Bath\b", re.IGNORECASE)
 SIZE_RE = re.compile(r"\b(\d{2,3})\s*m(?:²|2)\b", re.IGNORECASE)
+DETAIL_TYPE_RE = re.compile(
+    r"\d+\s*Bed\s+\d+\s*Bath(?:\s+\d+\s*m(?:²|2))?\s*"
+    r"(End of Terrace|Semi-D|Terraced House|Terrace|Detached|Bungalow|Duplex|Apartment|House)",
+    re.IGNORECASE,
+)
+MYHOME_TYPE_RE = re.compile(
+    r"Property Type\s+(.{2,40}?)(?:\s+Size|\s+Energy Rating|\s+Refreshed on|\s+Eircode)",
+    re.IGNORECASE,
+)
 CLOSED_TOKENS = (
     "sale agreed",
     "offer accepted",
     "applications closed",
     "registration closed",
-)
-PROPERTY_TYPES = (
-    "End of Terrace",
-    "Semi-D",
-    "Terraced House",
-    "Terrace",
-    "Detached",
-    "Bungalow",
-    "Duplex",
-    "Apartment",
-    "House",
 )
 
 
@@ -97,12 +95,9 @@ def _first_int(pattern: re.Pattern[str], text: str) -> int | None:
     return int(match.group(1).replace(",", "")) if match else None
 
 
-def _property_type(text: str, fallback: str = "House") -> str:
-    folded = text.casefold()
-    for value in PROPERTY_TYPES:
-        if value.casefold() in folded:
-            return value
-    return fallback
+def _detail_property_type(text: str, fallback: str = "House") -> str:
+    match = DETAIL_TYPE_RE.search(text)
+    return match.group(1) if match else fallback
 
 
 def _status(text: str) -> str:
@@ -131,7 +126,7 @@ def _apply_page_facts(item: SalesListing, text: str, verified_date: str) -> tupl
     before = item.model_dump(mode="json")
     data = dict(before)
     data["verified_at"] = verified_date
-    primary = text[:1200]
+    primary = text[:3000]
     data["status"] = _status(primary) if item.scheme == "private_sale" else item.status
 
     host = urlparse(str(item.url)).netloc.casefold()
@@ -145,7 +140,12 @@ def _apply_page_facts(item: SalesListing, text: str, verified_date: str) -> tupl
             data["bedrooms"] = beds
         if baths is not None and 0 < baths <= 12:
             data["bathrooms"] = baths
-        data["property_type"] = _property_type(primary, item.property_type or "House")
+        if "daft.ie" in host:
+            data["property_type"] = _detail_property_type(primary, item.property_type or "House")
+        elif "myhome.ie" in host:
+            type_match = MYHOME_TYPE_RE.search(primary)
+            if type_match:
+                data["property_type"] = type_match.group(1).strip()
 
     updated = SalesListing.model_validate(data)
     changed = []
@@ -173,13 +173,13 @@ def _discover_daft_links(html: str, base_url: str) -> list[str]:
 def _listing_from_daft(html: str, url: str, verified_date: str) -> SalesListing | None:
     text = _visible_text(html)
     title = _page_title(html).strip()
-    primary = text[:1200]
+    primary = text[:3000]
     price = _first_int(PRICE_RE, primary)
     bedrooms = _first_int(BED_RE, primary)
     bathrooms = _first_int(BATH_RE, primary)
     if not title or not price or bedrooms is None:
         return None
-    if price > 425_000 or bedrooms < 3 or "dublin 22" not in primary.casefold():
+    if price > 425_000 or bedrooms < 3 or "dublin 22" not in text.casefold():
         return None
     size = _first_int(SIZE_RE, primary)
     notes = f"每日自动发现并核验的 Dublin 22 房源，挂牌价约 €{price:,}。"
@@ -196,7 +196,7 @@ def _listing_from_daft(html: str, url: str, verified_date: str) -> SalesListing 
         price_eur=price,
         bedrooms=bedrooms,
         bathrooms=bathrooms,
-        property_type=_property_type(primary),
+        property_type=_detail_property_type(primary),
         ber="UNKNOWN",
         status=_status(primary),
         notes=notes,
@@ -290,10 +290,21 @@ def refresh_sales_data(
             discovered.sort(key=lambda item: (item.price_eur or 10**9, -(item.bedrooms or 0)))
             for item in discovered[:max_new]:
                 refreshed.append(item)
-                result.added.append(item.title)
                 result.verified += 1
         except Exception as exc:
             result.warnings.append(f"Daft discovery page: {exc}")
+
+    existing_urls = {str(item.url) for item in current}
+    private = [item for item in refreshed if item.scheme == "private_sale" and not item.is_closed]
+    private.sort(key=lambda item: (item.price_eur is None, item.price_eur or 10**12, -(item.bedrooms or 0)))
+    retained_private = private[:12]
+    retained_urls = {str(item.url) for item in retained_private}
+    result.added = [item.title for item in retained_private if str(item.url) not in existing_urls]
+    refreshed = [
+        item
+        for item in refreshed
+        if item.scheme != "private_sale" or item.is_closed or str(item.url) in retained_urls
+    ]
 
     if strict and result.verified == 0:
         raise RuntimeError("Sales refresh failed: no source page could be verified")
