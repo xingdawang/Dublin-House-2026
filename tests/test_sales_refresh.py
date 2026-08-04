@@ -15,10 +15,12 @@ def test_daft_discovery_deduplicates_detail_links():
 def test_daft_listing_extracts_price_beds_and_address():
     html = """
     <html><body>
+      <nav>Buy Houses Apartments Sold Properties</nav>
       <h1>17 Saint Ronan's Way, Clondalkin, Dublin 22, D22Y5W5</h1>
       <h2>€295,000</h2>
       <div>4 Bed 2 Bath Terrace</div>
       <p>89 m² Dublin 22</p>
+      <h3>Sold properties in this area</h3>
     </body></html>
     """
     listing = _listing_from_daft(
@@ -30,6 +32,8 @@ def test_daft_listing_extracts_price_beds_and_address():
     assert listing.price_eur == 295000
     assert listing.bedrooms == 4
     assert listing.bathrooms == 2
+    assert listing.property_type == "Terrace"
+    assert listing.status == "Current Listing"
     assert listing.verified_at == "2026-08-04"
 
 
