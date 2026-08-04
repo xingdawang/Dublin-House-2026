@@ -26,7 +26,6 @@ SIZE_RE = re.compile(r"\b(\d{2,3})\s*m(?:²|2)\b", re.IGNORECASE)
 CLOSED_TOKENS = (
     "sale agreed",
     "offer accepted",
-    "sold",
     "applications closed",
     "registration closed",
 )
@@ -132,20 +131,21 @@ def _apply_page_facts(item: SalesListing, text: str, verified_date: str) -> tupl
     before = item.model_dump(mode="json")
     data = dict(before)
     data["verified_at"] = verified_date
-    data["status"] = _status(text) if item.scheme == "private_sale" else item.status
+    primary = text[:1200]
+    data["status"] = _status(primary) if item.scheme == "private_sale" else item.status
 
     host = urlparse(str(item.url)).netloc.casefold()
     if item.scheme == "private_sale" and any(domain in host for domain in ("daft.ie", "myhome.ie")):
-        price = _first_int(PRICE_RE, text)
-        beds = _first_int(BED_RE, text)
-        baths = _first_int(BATH_RE, text)
+        price = _first_int(PRICE_RE, primary)
+        beds = _first_int(BED_RE, primary)
+        baths = _first_int(BATH_RE, primary)
         if price and 100_000 <= price <= 5_000_000:
             data["price_eur"] = price
         if beds is not None and 0 < beds <= 12:
             data["bedrooms"] = beds
         if baths is not None and 0 < baths <= 12:
             data["bathrooms"] = baths
-        data["property_type"] = _property_type(text, item.property_type or "House")
+        data["property_type"] = _property_type(primary, item.property_type or "House")
 
     updated = SalesListing.model_validate(data)
     changed = []
@@ -173,14 +173,15 @@ def _discover_daft_links(html: str, base_url: str) -> list[str]:
 def _listing_from_daft(html: str, url: str, verified_date: str) -> SalesListing | None:
     text = _visible_text(html)
     title = _page_title(html).strip()
-    price = _first_int(PRICE_RE, text)
-    bedrooms = _first_int(BED_RE, text)
-    bathrooms = _first_int(BATH_RE, text)
+    primary = text[:1200]
+    price = _first_int(PRICE_RE, primary)
+    bedrooms = _first_int(BED_RE, primary)
+    bathrooms = _first_int(BATH_RE, primary)
     if not title or not price or bedrooms is None:
         return None
-    if price > 425_000 or bedrooms < 3 or "dublin 22" not in text.casefold():
+    if price > 425_000 or bedrooms < 3 or "dublin 22" not in primary.casefold():
         return None
-    size = _first_int(SIZE_RE, text)
+    size = _first_int(SIZE_RE, primary)
     notes = f"每日自动发现并核验的 Dublin 22 房源，挂牌价约 €{price:,}。"
     if size:
         notes += f" 页面显示约 {size}㎡，约 €{price / size:,.0f}/㎡。"
@@ -195,9 +196,9 @@ def _listing_from_daft(html: str, url: str, verified_date: str) -> SalesListing 
         price_eur=price,
         bedrooms=bedrooms,
         bathrooms=bathrooms,
-        property_type=_property_type(text),
+        property_type=_property_type(primary),
         ber="UNKNOWN",
-        status=_status(text),
+        status=_status(primary),
         notes=notes,
         verified_at=verified_date,
     )
