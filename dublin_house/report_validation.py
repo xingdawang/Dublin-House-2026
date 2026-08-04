@@ -59,8 +59,15 @@ def validate_report_html(
     *,
     overview_title: str,
     require_static_map: bool = False,
+    map_cid: str | None = None,
 ) -> None:
-    """Enforce the canonical housing-email layout for sales and rentals."""
+    """Enforce the canonical housing-email layout for sales and rentals.
+
+    The Google Static Maps image must be downloaded during generation and
+    attached to the message as a CID image. This prevents Gmail or another
+    email client from losing the map because a remote URL was blocked,
+    rewritten, expired, or contained a protected API key.
+    """
     normalized_html = unescape(html)
     required = [
         "更新日期：",
@@ -74,10 +81,18 @@ def validate_report_html(
         "Google Maps",
     ]
     if require_static_map:
+        if not map_cid:
+            raise ValueError("Email standard validation requires map_cid when require_static_map=True")
         required.extend(
             [
                 "<img",
-                "maps.googleapis.com/maps/api/staticmap",
+                f'src="cid:{map_cid}"',
+                'width="640"',
+                "display:block",
+                "width:100%",
+                "max-width:640px",
+                "height:auto",
+                "border-radius:10px",
                 "在 Google Maps 中打开总览",
                 "border-radius:50%",
                 "地图颜色汇总",
@@ -90,14 +105,18 @@ def validate_report_html(
         raise ValueError("Email standard validation failed; missing: " + ", ".join(missing))
 
     forbidden = [
-        "cid:sales-map",
-        "cid:rental-map",
         "地图暂不可用",
         "本期新闻与市场更新",
     ]
     if require_static_map:
-        forbidden.extend(["本期没有合适项目。", "本期没有 Watchlist 项目。"])
+        forbidden.extend(
+            [
+                "maps.googleapis.com/maps/api/staticmap",
+                "本期没有合适项目。",
+                "本期没有 Watchlist 项目。",
+            ]
+        )
 
     present = [token for token in forbidden if token in normalized_html]
     if present:
-        raise ValueError("Email standard validation failed; obsolete format found: " + ", ".join(present))
+        raise ValueError("Email standard validation failed; obsolete or unsafe format found: " + ", ".join(present))
