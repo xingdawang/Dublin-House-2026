@@ -1,5 +1,44 @@
 [
   {
+    "source": "Tuath Housing",
+    "provider": "Tuath Housing",
+    "title": "Barnoaks",
+    "url": "https://tuathhousing.ie/properties/barnoaks/",
+    "address": "Barnoaks, Citywest, Dublin 24",
+    "rent_eur": 1026,
+    "bedrooms": 0,
+    "status": "Applications closed 9 July 2026",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Official page lists a studio at €1,026 per month near the Citywest Luas stop; retained for re-let or future-phase monitoring.",
+    "verified_at": "2026-08-04"
+  },
+  {
+    "source": "Tuath Housing",
+    "provider": "Tuath Housing",
+    "title": "Swiftbanks",
+    "url": "https://tuathhousing.ie/properties/swiftbanks-2/",
+    "address": "Swiftbanks, Mill Road, Saggart, Dublin 24",
+    "rent_eur": 1375,
+    "bedrooms": 1,
+    "status": "Applications closed 9 July 2026",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Official page lists one one-bedroom apartment at €1,375 per month close to Saggart village and Citywest transport links.",
+    "verified_at": "2026-08-04"
+  },
+  {
+    "source": "Tuath Housing",
+    "provider": "Tuath Housing",
+    "title": "Folkstown Park",
+    "url": "https://tuathhousing.ie/properties/folkstown-park-2/",
+    "address": "Folkstown Park, Balbriggan, Co. Dublin",
+    "rent_eur": 1150,
+    "bedrooms": 1,
+    "status": "Applications closed 22 June 2026",
+    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
+    "notes": "Phase 1 includes one-, two- and three-bedroom homes; the official page says further homes are anticipated later in 2026.",
+    "verified_at": "2026-08-04"
+  },
+  {
     "source": "Respond",
     "provider": "Respond Housing Association",
     "title": "Cronans Well, Mooretown",
@@ -9,46 +48,7 @@
     "bedrooms": 3,
     "status": "Applications closed 27 July 2026",
     "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
-    "notes": "Official page listed one three-bedroom house and a closing time of 11:00 on 27 July 2026. Retained for future phase monitoring only.",
-    "verified_at": "2026-07-31"
-  },
-  {
-    "source": "Tuath Housing",
-    "provider": "Tuath Housing",
-    "title": "Niven Oaks",
-    "url": "https://tuathhousing.ie/properties/niven-oaks-santry/",
-    "address": "Niven Oaks, Northwood, Santry, Co. Dublin",
-    "rent_eur": 1350,
-    "bedrooms": 1,
-    "status": "Applications closed",
-    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
-    "notes": "Official page lists one-bedroom apartments from €1,350 and two-bedroom apartments from €1,585, but confirms applications are closed.",
-    "verified_at": "2026-07-31"
-  },
-  {
-    "source": "Tuath Housing",
-    "provider": "Tuath Housing",
-    "title": "Kilmartin Grove",
-    "url": "https://tuathhousing.ie/properties/kilmartin-grove/",
-    "address": "Kilmartin Grove, Dublin 15",
-    "rent_eur": 1226,
-    "bedrooms": 1,
-    "status": "Applications closed",
-    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
-    "notes": "Official page lists one-bedroom apartments from €1,226 and confirms applications are now closed. Retained because the pricing remains a useful benchmark for later releases.",
-    "verified_at": "2026-07-31"
-  },
-  {
-    "source": "Respond",
-    "provider": "Respond Housing Association",
-    "title": "The Place, Seven Mills",
-    "url": "https://www.respond.ie/properties/the-place-seven-mills/",
-    "address": "The Place, Seven Mills, Dublin 22",
-    "rent_eur": 1836,
-    "bedrooms": 3,
-    "status": "Applications closed",
-    "eligibility": "Dublin Cost Rental eligibility applies; applicants must meet the official household, housing-support, ownership and affordability rules.",
-    "notes": "Official project page confirms applications are closed. Retained to monitor possible future releases in Seven Mills.",
-    "verified_at": "2026-07-31"
+    "notes": "Official page advertised one three-bedroom house at €1,654 per month; retained for possible future releases in the development.",
+    "verified_at": "2026-08-04"
   }
 ]
