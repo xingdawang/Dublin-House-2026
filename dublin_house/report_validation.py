@@ -82,7 +82,7 @@ def validate_report_html(
     ]
     if require_static_map:
         if not map_cid:
-            raise ValueError("Email standard validation requires map_cid when require_static_map=True")
+            map_cid = "rental-map" if "出租" in overview_title else "sales-map"
         required.extend(
             [
                 "<img",
