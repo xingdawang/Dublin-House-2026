@@ -6,7 +6,7 @@ on:
     paths:
       - ".github/manual-run/sales"
   schedule:
-    - cron: "7 7 * * *"
+    - cron: "0 7 * * *"
       timezone: "Europe/Dublin"
 
 permissions:
@@ -19,38 +19,49 @@ concurrency:
 jobs:
   send-sales-email:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
       PYTHONPATH: .
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Check baseline data
         run: |
           test -f data/sales_listings.json
           test -f data/sales_insights.json
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       - name: Refresh and compare sales sources
         run: python scripts/refresh_sales.py --strict --discovery-limit 25 --max-new 6
-      - name: Test
+
+      - name: Run tests
         run: pytest -q
-      - name: Preflight email
+
+      - name: Preflight HTML, CID map and SMTP
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: python scripts/run_sales.py --preflight
-      - name: Generate and send
+
+      - name: Generate and send one canonical email
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: python scripts/run_sales.py --send
+
       - name: Persist refreshed source data
         shell: bash
         run: |
