@@ -27,8 +27,16 @@ def prepare_live_rentals(path: str) -> Path:
         last_error: Exception | None = None
         for attempt in range(1, 4):
             try:
-                validate_live_rental_url(str(item.url), title=item.display_title)
-                valid_rows.append(raw)
+                final_url = validate_live_rental_url(str(item.url), title=item.display_title)
+                valid_rows.append(
+                    RentalListing.model_validate(
+                        {
+                            **item.model_dump(mode="json"),
+                            "url": final_url,
+                            "verified_at": dublin_now().strftime("%Y-%m-%d"),
+                        }
+                    ).model_dump(mode="json")
+                )
                 last_error = None
                 break
             except Exception as exc:  # noqa: BLE001 - preserve per-listing diagnostics

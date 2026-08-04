@@ -63,13 +63,15 @@ baseline data
 
 ```text
 baseline data
+→ refresh, compare and persist rental sources in the workspace
 → pytest
 → validate live private listings
 → HTML / CID map / SMTP preflight
 → send one email
+→ commit refreshed rental data
 ```
 
-租赁任务当前尚未实现完整的自动发现和数据持久化。Codex 接手说明见 `docs/CODEX_HANDOFF.md`。
+租赁工作流具有 `contents: write` 权限，仅用于在成功发送后把刷新的私人租赁与 Cost Rental JSON 提交回默认分支。刷新、测试、详情页复核、地图或邮件预检任一失败时均不会提交或发送。
 
 ## 并发与失败策略
 

@@ -4,6 +4,17 @@ from html import unescape
 from urllib.parse import urlparse
 
 import httpx
+from bs4 import BeautifulSoup
+
+
+RENTAL_UNAVAILABLE_TOKENS = (
+    "property is no longer available",
+    "listing is no longer available",
+    "this listing has expired",
+    "property has been let",
+    "let agreed",
+    "no longer on the market",
+)
 
 
 def validate_direct_url(url: str, *, title: str) -> None:
@@ -39,6 +50,15 @@ def validate_live_rental_url(url: str, *, title: str) -> str:
         raise ValueError(f"{title}: listing page returned HTTP {response.status_code}")
 
     final_url = str(response.url)
+    validate_rental_detail_url(final_url, title=title)
+    if rental_page_is_unavailable(response.text):
+        raise ValueError(f"{title}: listing page says the property is no longer available")
+    return final_url
+
+
+def validate_rental_detail_url(url: str, *, title: str) -> None:
+    """Validate a resolved private-rental URL without performing another request."""
+    final_url = str(url)
     validate_direct_url(final_url, title=title)
     parsed = urlparse(final_url)
     host = parsed.netloc.casefold().removeprefix("www.")
@@ -51,7 +71,15 @@ def validate_live_rental_url(url: str, *, title: str) -> str:
         if len(parts) < 3 or parts[0] != "houses-to-let" or not parts[-1].isdigit():
             raise ValueError(f"{title}: Rent.ie link does not resolve to a concrete rental listing")
 
-    return final_url
+
+def rental_page_is_unavailable(html: str) -> bool:
+    """Detect explicit unavailable states on an otherwise valid rental detail page."""
+    soup = BeautifulSoup(html, "html.parser")
+    for node in soup(["script", "style", "noscript"]):
+        node.decompose()
+    main = soup.find("main")
+    text = " ".join((main or soup).stripped_strings)[:6000].casefold()
+    return any(token in text for token in RENTAL_UNAVAILABLE_TOKENS)
 
 
 def validate_report_html(

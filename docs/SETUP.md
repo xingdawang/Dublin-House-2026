@@ -18,7 +18,7 @@
 
 ## 3. 数据文件
 
-实际数据文件默认不提交到 Git：
+定时任务使用以下实际数据文件，并在成功发送后提交刷新结果作为下一轮比较基线：
 
 - `data/sales_listings.json`
 - `data/private_rentals.json`
@@ -26,14 +26,15 @@
 
 可以从对应的 `.example.json` 复制后更新。每条记录必须保留原始 URL 和 `verified_at`。
 
-### Daft.ie
+### 私人租赁发现
 
-Daft.ie 是租赁任务的固定发现来源。商业平台可能使用动态渲染、速率限制或验证码；本项目不绕过访问控制。建议通过合规浏览、公开搜索结果或授权数据源发现候选房源，然后在写入 JSON 前打开原始页面核实价格、状态和整租属性。
+租赁刷新器使用公开 Daft.ie 与 Rent.ie 搜索页发现候选，并只接受可访问的具体详情页。商业平台可能使用动态渲染、速率限制或验证码；本项目不绕过访问控制。遇到此类限制时记录警告并保留可靠旧数据，不把搜索页或未核实候选写入正式邮件数据。
 
 ## 4. 本地测试
 
 ```bash
 pytest -q
+python scripts/refresh_rental.py --strict --discovery-limit 25 --max-new 8
 python scripts/run_sales.py --data-file data/sales_listings.example.json
 python scripts/run_rental.py \
   --rental-file data/private_rentals.example.json \

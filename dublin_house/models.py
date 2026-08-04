@@ -100,6 +100,24 @@ class RentalListing(BaseModel):
     def google_maps_url(self) -> str:
         return f"https://www.google.com/maps/search/?api=1&query={quote_plus(self.address)}"
 
+    @property
+    def is_available(self) -> bool:
+        text = self.status.casefold()
+        if any(
+            token in text
+            for token in (
+                "unavailable",
+                "no longer available",
+                "let agreed",
+                "has been let",
+                "closed",
+                "expired",
+                "withdrawn",
+            )
+        ):
+            return False
+        return "available" in text or "current listing" in text
+
 
 class CostRentalProject(BaseModel):
     source: str

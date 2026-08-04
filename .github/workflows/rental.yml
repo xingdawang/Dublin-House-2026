@@ -9,6 +9,9 @@ on:
     - cron: "0 7 * * 1"
       timezone: "Europe/Dublin"
 
+permissions:
+  contents: write
+
 concurrency:
   group: south-dublin-housing-rental
   cancel-in-progress: false
@@ -37,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Refresh and compare rental sources
+        run: python scripts/refresh_rental.py --strict --discovery-limit 25 --max-new 8
+
       - name: Run tests
         run: pytest -q
 
@@ -55,3 +61,16 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: python scripts/run_rental.py --send
+
+      - name: Persist refreshed rental data
+        shell: bash
+        run: |
+          if [[ -z "$(git status --porcelain -- data/private_rentals.json data/cost_rental.json)" ]]; then
+            echo "No rental-data changes to persist."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/private_rentals.json data/cost_rental.json
+          git commit -m "data: refresh rental sources $(TZ=Europe/Dublin date +%F)"
+          git push

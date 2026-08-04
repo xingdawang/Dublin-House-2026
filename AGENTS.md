@@ -82,6 +82,8 @@ python scripts/run_rental.py --send
 主要文件：
 
 - 工作流：`.github/workflows/rental.yml`
+- 刷新器：`dublin_house/rental_refresh.py`
+- 刷新命令：`scripts/refresh_rental.py`
 - 报告生成：`dublin_house/rental.py`
 - 发送入口：`scripts/run_rental.py`
 - 模板：`templates/rental_report.html.j2`
@@ -89,11 +91,13 @@ python scripts/run_rental.py --send
 
 硬性规则：
 
+- 每周发送前必须以 `--strict` 刷新公开租赁来源并比较变化。
+- 只有成功访问并核验的页面才能更新 `verified_at`；临时失败保留可靠旧记录和原日期。
 - 发送前必须逐条检查私人租赁详情链接仍然有效。
-- 无效、重定向到搜索页或已失效的私人房源不得进入正式邮件。
+- 无效、重定向到搜索页、正文明确已出租或已失效的私人房源不得进入正式邮件。
 - 至少保留一套有效私人整租；否则停止发送。
 - Cost Rental 必须使用公开官方项目页或可靠直接项目页。
-- 当前租赁数据尚未实现与销售同等级的自动发现和数据持久化；这是明确的后续改进项，不得假装已经完成。
+- 成功发送后必须持久化 `private_rentals.json` 和 `cost_rental.json`，作为下一轮比较基线。
 
 ## 6. Secrets
 

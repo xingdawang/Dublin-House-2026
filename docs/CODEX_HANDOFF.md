@@ -12,7 +12,7 @@
 | 地图 PNG | `output/sales_map.png` | `output/rental_map.png` |
 | 地图 CID | `sales-map` | `rental-map` |
 | 主要数据 | `sales_listings.json`、`sales_insights.json` | `private_rentals.json`、`cost_rental.json` |
-| 自动刷新 | 已实现来源核验、Daft 发现和变化摘要 | 尚未实现完整自动发现；发送前会检查现有私人房源链接 |
+| 自动刷新 | 已实现来源核验、Daft 发现和变化摘要 | 已实现 Daft.ie／Rent.ie 发现、变化比较、失效处理和持久化 |
 
 ## 2. 统一运行模型
 
@@ -96,6 +96,7 @@ python scripts/run_sales.py --send
 ### 执行顺序
 
 ```bash
+python scripts/refresh_rental.py --strict --discovery-limit 25 --max-new 8
 pytest -q
 python scripts/run_rental.py --preflight
 python scripts/run_rental.py --send
@@ -104,16 +105,19 @@ python scripts/run_rental.py --send
 ### 关键行为
 
 - 对每条私人房源进行最多三次详情页检查。
-- 无效链接会被排除，不会进入正式邮件。
+- 公开 Daft.ie 与 Rent.ie 搜索页用于发现候选，只接受具体详情页。
+- 比较租金、卧室、浴室、房型、状态和最终 URL 变化。
+- 404／410、搜索页重定向或正文明确失效的房源会从活跃私人租赁数据中移除。
+- 单一来源临时失败时保留旧记录及原核验日期；所有私人详情页均无法核验时 `--strict` 失败。
+- 发送前仍会重新核验详情页，失效链接不会进入正式邮件。
 - 如果没有任何有效私人房源，整个任务失败。
 - Cost Rental 按开放和 Watchlist 分类展示。
 - 邮件按租金、户型匹配和区域偏好进行排序。
+- 成功发送后，工作流提交更新后的私人租赁和 Cost Rental JSON。
 
-### 当前明确缺口
+### 访问限制与保守策略
 
-租赁任务目前没有完整的“搜索页发现 → 新增候选 → 对比变化 → 保存数据”自动刷新器。迁移到 Codex 后，建议把它作为第一阶段改进，但必须遵守平台条款，不得绕过验证码或反自动化措施。
-
-建议目标文件：
+实现文件：
 
 ```text
 dublin_house/rental_refresh.py
@@ -121,16 +125,17 @@ scripts/refresh_rental.py
 tests/test_rental_refresh.py
 ```
 
-建议工作流最终顺序：
+工作流顺序：
 
 ```text
 refresh rental sources
-→ validate live detail pages
-→ persist refreshed data
 → test
-→ preflight
+→ validate live detail pages and preflight
 → send
+→ commit refreshed data
 ```
+
+商业平台的动态渲染、限流、验证码或反自动化响应一律视为来源失败；任务不会绕过访问控制。单一失败会保留可靠旧记录，但严格刷新无法核验任何私人详情页时必须停止。
 
 ## 6. 本地启动
 

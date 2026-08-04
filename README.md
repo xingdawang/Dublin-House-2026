@@ -83,12 +83,13 @@ python scripts/run_sales.py --send
 默认流程：
 
 ```bash
+python scripts/refresh_rental.py --strict --discovery-limit 25 --max-new 8
 pytest -q
 python scripts/run_rental.py --preflight
 python scripts/run_rental.py --send
 ```
 
-发送前会逐条检查现有私人租赁详情链接。租赁任务目前尚未实现与销售相同等级的自动发现和数据持久化，具体改进建议见 `docs/CODEX_HANDOFF.md`。
+刷新器从公开 Daft.ie 与 Rent.ie 搜索页发现具体房源，比较已跟踪房源的租金、户型、状态和最终 URL；确定失效的私人房源会被移除，临时访问失败会保留可靠旧记录及原核验日期。发送前仍会逐条重新检查详情页，成功发送后工作流把租赁 JSON 提交回默认分支。
 
 ## 本地安装
 

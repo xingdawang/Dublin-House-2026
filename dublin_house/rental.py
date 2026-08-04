@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 from .common import dublin_now, load_json_rows, load_settings, output_dir
@@ -29,7 +30,7 @@ def select_and_rank(rows: list[RentalListing], settings: dict) -> list[dict]:
             continue
         if item.bedrooms == 2 and item.rent_eur > int(cfg["max_two_bed_rent_eur"]):
             continue
-        if item.bedrooms > 2 or "available" not in item.status.lower():
+        if item.bedrooms > 2 or not item.is_available:
             continue
         selected.append(item)
 
@@ -104,12 +105,27 @@ def build_rental_map_index(
     return open_cost, watchlist, map_labels
 
 
-def _verification_period(hour: int) -> str:
-    if hour < 12:
-        return "上午"
-    if hour < 18:
-        return "下午"
-    return "晚间"
+def build_rental_map_color_counts(map_labels: list[dict]) -> dict[str, int]:
+    return {
+        color: sum(1 for item in map_labels if item["color"] == color)
+        for color in ("orange", "green", "gray")
+    }
+
+
+def _verification_label(
+    rentals: list[RentalListing],
+    cost_projects: list[CostRentalProject],
+) -> str:
+    dates = sorted(
+        date
+        for date in (str(item.verified_at)[:10] for item in [*rentals, *cost_projects])
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", date)
+    )
+    if not dates:
+        raise ValueError("Rental data has no valid verified_at dates")
+    if dates[0] == dates[-1]:
+        return f"来源核验截至 {dates[-1]}"
+    return f"最新来源 {dates[-1]}；最旧记录 {dates[0]}"
 
 
 def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_file: str | None = None) -> Path:
@@ -126,9 +142,12 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
         validate_direct_url(str(item.url), title=item.title)
 
     ranked = select_and_rank(rentals, settings)
+    if not ranked:
+        raise RuntimeError("Rental report has no eligible private whole-unit listing")
     open_cost, watchlist, map_labels = build_rental_map_index(ranked, cost_projects)
     generated_at = dublin_now()
     map_overview_url = os.getenv("RENTAL_MAP_OVERVIEW_URL", RENTAL_MAP_OVERVIEW_URL)
+    map_color_counts = build_rental_map_color_counts(map_labels)
 
     points = [
         MapPoint(
@@ -145,7 +164,7 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
     html = render(
         "rental_report.html.j2",
         updated_date=generated_at.strftime("%Y-%m-%d"),
-        verified_label=f"{generated_at:%Y-%m-%d} {_verification_period(generated_at.hour)}",
+        verified_label=_verification_label(rentals, cost_projects),
         focus_summary=build_rental_focus(ranked, open_cost, watchlist),
         total_count=len(ranked) + len(open_cost) + len(watchlist),
         location_count=len(map_labels),
@@ -156,6 +175,7 @@ def generate(*, send: bool = False, rental_file: str | None = None, cost_rental_
         map_overview_url=map_overview_url,
         google_static_map_url=map_result.url,
         map_labels=map_labels,
+        map_color_counts=map_color_counts,
         sources=settings["rental"]["sources"],
     )
     report_path = output_dir() / "rental_report.html"
