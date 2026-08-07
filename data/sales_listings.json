@@ -15,7 +15,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "约 86㎡，挂牌约 €3,314/㎡。在当前可见的 Dublin 22 三居 House 中，总价和单位面积价格都具有较强的初筛性价比；仍需核验房屋状况、翻修预算和出价进度。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -35,7 +35,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €295,000。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -62,6 +62,26 @@
   {
     "source": "Daft",
     "provider": "Daft.ie 每日发现",
+    "title": "53 Kilcronan Avenue, Clondalkin, Dublin 22, D22XF90",
+    "url": "https://www.daft.ie/for-sale/53-kilcronan-avenue-clondalkin-dublin-22/6638275",
+    "address": "53 Kilcronan Avenue, Clondalkin, Dublin 22, D22XF90",
+    "region": "Dublin 22",
+    "scheme": "private_sale",
+    "price_eur": 295000,
+    "bedrooms": 3,
+    "bathrooms": 1,
+    "property_type": "End of Terrace",
+    "ber": "UNKNOWN",
+    "status": "Current Listing",
+    "eligibility": "",
+    "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €295,000。 页面显示约 80㎡，约 €3,688/㎡。",
+    "verified_at": "2026-08-07",
+    "latitude": null,
+    "longitude": null
+  },
+  {
+    "source": "Daft",
+    "provider": "Daft.ie 每日发现",
     "title": "144 Cherrywood Park, Clondalkin, Churchtown, Dublin 22",
     "url": "https://www.daft.ie/for-sale/144-cherrywood-park-clondalkin-churchtown-dublin-22/6638095",
     "address": "144 Cherrywood Park, Clondalkin, Churchtown, Dublin 22",
@@ -75,7 +95,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €335,000。 页面显示约 84㎡，约 €3,988/㎡。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -95,7 +115,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €345,000。 页面显示约 67㎡，约 €5,149/㎡。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -115,7 +135,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €365,000。 页面显示约 73㎡，约 €5,000/㎡。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -135,7 +155,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €365,000。 页面显示约 76㎡，约 €4,803/㎡。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -155,7 +175,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €375,000。 页面显示约 86㎡，约 €4,360/㎡。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -175,7 +195,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €375,000。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -195,7 +215,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €390,000。 页面显示约 122㎡，约 €3,197/㎡。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -215,27 +235,7 @@
     "status": "Current Listing",
     "eligibility": "",
     "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €395,000。 页面显示约 90㎡，约 €4,389/㎡。",
-    "verified_at": "2026-08-06",
-    "latitude": null,
-    "longitude": null
-  },
-  {
-    "source": "Daft",
-    "provider": "Daft.ie 每日发现",
-    "title": "23 Woodford View, Clondalkin, Dublin 22, D22FF67",
-    "url": "https://www.daft.ie/for-sale/23-woodford-view-clondalkin-dublin-22/6608176",
-    "address": "23 Woodford View, Clondalkin, Dublin 22, D22FF67",
-    "region": "Dublin 22",
-    "scheme": "private_sale",
-    "price_eur": 395000,
-    "bedrooms": 3,
-    "bathrooms": 1,
-    "property_type": "End of Terrace",
-    "ber": "UNKNOWN",
-    "status": "Current Listing",
-    "eligibility": "",
-    "notes": "每日自动发现并核验的 Dublin 22 房源，挂牌价约 €395,000。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -255,7 +255,7 @@
     "status": "Applications open 2026-08-12 12:00",
     "eligibility": "按 Affordable Purchase 规则准备身份、收入、按揭能力和首付款证明；最终以官方项目页面为准。",
     "notes": "约 40 套一居室 Affordable Purchase 住宅，属于南都柏林较少见的一居室项目。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -275,7 +275,7 @@
     "status": "Applications open 2026-08-06 10:00",
     "eligibility": "按 Affordable Purchase 规则准备身份、收入、按揭能力和首付款证明；最终以官方项目页面为准。",
     "notes": "约 65 套 3 居和 4 居 A-rated 住宅，申请窗口为 2026-08-06 10:00。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -295,7 +295,7 @@
     "status": "Current Availability",
     "eligibility": "",
     "notes": "当前可核验户型包括 1 居约 €370,000 起、2 居约 €457,500 起、3 居 Duplex 约 €515,000 起、3 居 House 约 €550,000 起和 4 居约 €635,000。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -315,7 +315,7 @@
     "status": "Launching Summer 2026",
     "eligibility": "",
     "notes": "约 25 套 1、2、3 居公寓、复式和联排住宅，参考价格约 €470,000–€795,000；继续跟踪正式开放、预约看房和库存。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -335,7 +335,7 @@
     "status": "New Phase Coming Soon",
     "eligibility": "",
     "notes": "Savills 页面显示新一期即将推出。当前参考价格包括 2 居约 €500,000、3 居约 €545,000、4 居约 €630,000；建议尽早登记兴趣。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -355,7 +355,7 @@
     "status": "Final Homes / Current Availability",
     "eligibility": "",
     "notes": "Aderrig 正处于最后一批房源阶段。当前参考包括 3 居约 €545,000–€565,000、4 居约 €720,000 起，另有少量 2 居公寓价格待询；项目紧邻 Airlie Park。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -375,7 +375,7 @@
     "status": "Current Availability",
     "eligibility": "",
     "notes": "页面显示三居和四居住宅有限供应，参考价格约 €600,000–€860,000；Woodbrook DART 站已启用。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   },
@@ -395,7 +395,7 @@
     "status": "Current Availability Example",
     "eligibility": "",
     "notes": "3 居 Duplex，约 107㎡，继续作为 Cherrywood 新房价格、Luas 通勤和社区成熟度的比较项目。",
-    "verified_at": "2026-08-06",
+    "verified_at": "2026-08-07",
     "latitude": null,
     "longitude": null
   }
