@@ -21,10 +21,13 @@
 定时任务使用以下实际数据文件，并在成功发送后提交刷新结果作为下一轮比较基线：
 
 - `data/sales_listings.json`
+- `data/sales_new_build_candidates.json`
 - `data/private_rentals.json`
 - `data/cost_rental.json`
 
 可以从对应的 `.example.json` 复制后更新。每条记录必须保留原始 URL 和 `verified_at`。
+
+`sales_new_build_candidates.json` 是新房自动发现候选池：它保留已核验但未必进入当期邮件的项目，用于跨天去重、状态比较和每天限量加入。正式邮件仍只读取经过筛选的 `sales_listings.json`。
 
 ### 私人租赁发现
 

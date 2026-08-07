@@ -59,6 +59,8 @@ class SalesListing(BaseModel):
                 "deadline passed",
                 "registrations closed",
                 "applications closed",
+                "unavailable",
+                "watchlist",
             )
         )
 

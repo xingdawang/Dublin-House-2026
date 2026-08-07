@@ -11,8 +11,8 @@
 | 邮件模板 | `templates/sales_report.html.j2` | `templates/rental_report.html.j2` |
 | 地图 PNG | `output/sales_map.png` | `output/rental_map.png` |
 | 地图 CID | `sales-map` | `rental-map` |
-| 主要数据 | `sales_listings.json`、`sales_insights.json` | `private_rentals.json`、`cost_rental.json` |
-| 自动刷新 | 已实现来源核验、Daft 发现和变化摘要 | 已实现 Daft.ie／Rent.ie 发现、变化比较、失效处理和持久化 |
+| 主要数据 | `sales_listings.json`、`sales_insights.json`、`sales_new_build_candidates.json` | `private_rentals.json`、`cost_rental.json` |
+| 自动刷新 | 已实现多来源新房项目发现、Daft 二手房发现、候选池和变化摘要 | 已实现 Daft.ie／Rent.ie 发现、变化比较、失效处理和持久化 |
 
 ## 2. 统一运行模型
 
@@ -70,7 +70,11 @@ GitHub Actions schedule / manual dispatch
 ### 执行顺序
 
 ```bash
-python scripts/refresh_sales.py --strict --discovery-limit 25 --max-new 6
+python scripts/refresh_sales.py --strict --discovery-limit 8 --max-new 12 \
+  --max-private 6 --max-apartment-only 1 \
+  --max-new-build-projects 18 --max-new-build-additions 6 \
+  --max-affordable-projects 4 --max-affordable-additions 2 \
+  --min-new-build-sources 2
 pytest -q
 python scripts/run_sales.py --preflight
 python scripts/run_sales.py --send
@@ -79,11 +83,16 @@ python scripts/run_sales.py --send
 ### 关键行为
 
 - 对现有项目详情页进行核验。
-- 使用 Daft Dublin 22 Houses 发现候选房源。
+- 从 Savills、Durkan、Evara、Hooke & MacDonald 和 Affordable Homes 公开目录自动发现新房项目；只接受核验成功的详情页。
+- 新房范围覆盖指定的南都柏林偶数邮区及南部地名，跨来源去重并优先使用开发商官方页面。
+- `sales_new_build_candidates.json` 保存完整候选池；邮件从中渐进加入项目，普通新房每轮最多 6 个、Affordable Purchase 每轮最多 2 个。
+- 使用 Daft 逐区扫描 Dublin 2、4、6、6W、8、10、12、14、16、18、20、22、24 Houses，Daft 受限时使用 MyHome 公开结构化房源回退；搜索/结构化候选和最终详情页必须分开校验。
+- 活跃二手房先跨邮区保留低价房源，再按全局低价补齐，去重后最多 6 套；Sale Agreed 等失效二手房排除；纯公寓项目最多保留 1 个。
+- 日报优先持续跟踪开发商和销售代理的新房 House 项目，混合项目只有明确包含 House 户型时才作为住宅候选保留。
 - 对比价格、卧室、浴室、房型和状态变化。
 - 单个来源失败时保留上一轮数据及原核验日期。
-- 全部来源都无法核验时，`--strict` 失败并停止发送。
-- 成功发送后，工作流将更新后的销售 JSON 提交回默认分支。
+- 全部来源都无法核验，或少于两个新房目录可访问，或没有任何南都柏林新房详情页核验成功时，`--strict` 失败并停止发送。
+- 成功发送后，工作流将更新后的三份销售 JSON 提交回默认分支。
 
 ### 已知风险
 

@@ -56,20 +56,26 @@ Google Static Maps URL只用于运行时下载 PNG，不会写入最终邮件 HT
 - Coming Soon
 - Affordable Purchase
 - 开发商和销售代理新房
-- Dublin 22 等重点区域二手房
+- Dublin 2、4、6、8、10、12、14、16、18、20、22、24 二手 House
 - 价格与状态变化
 - Planning 和 Watchlist
 
 默认流程：
 
 ```bash
-python scripts/refresh_sales.py --strict --discovery-limit 25 --max-new 6
+python scripts/refresh_sales.py --strict --discovery-limit 8 --max-new 12 \
+  --max-private 6 --max-apartment-only 1 \
+  --max-new-build-projects 18 --max-new-build-additions 6 \
+  --max-affordable-projects 4 --max-affordable-additions 2 \
+  --min-new-build-sources 2
 pytest -q
 python scripts/run_sales.py --preflight
 python scripts/run_sales.py --send
 ```
 
-销售刷新成功后，GitHub Actions 会把更新后的 `data/sales_listings.json` 和 `data/sales_insights.json` 提交回默认分支，作为下一轮比较基线。
+销售刷新器每天从开发商、销售代理和 Affordable Homes 的公开目录发现南都柏林项目，只有可访问的具体项目详情页才进入候选池。范围覆盖 Dublin 2、4、6、8、10、12、14、16、18、20、22、24，并补充 Adamstown、Lucan、Tallaght、Cherrywood、Shankill、Kilternan、Stillorgan 等南部区域。二手 House 同样逐区扫描这 12 个邮区（D6 同时补充 D6W），Daft 受限时使用 MyHome 公开结构化房源作回退，候选最终仍必须通过具体详情页校验。系统排除 Sale Agreed 等失效状态，并优先跨邮区保留低价候选。新房优先 House，纯公寓仍保留少量对照。
+
+刷新成功后，GitHub Actions 会把 `data/sales_listings.json`、`data/sales_insights.json` 和 `data/sales_new_build_candidates.json` 提交回默认分支，作为下一轮比较基线。
 
 ## 租赁周报
 

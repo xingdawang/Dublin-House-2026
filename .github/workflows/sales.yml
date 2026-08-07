@@ -30,6 +30,7 @@ jobs:
         run: |
           test -f data/sales_listings.json
           test -f data/sales_insights.json
+          test -f data/sales_new_build_candidates.json
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,7 +42,12 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Refresh and compare sales sources
-        run: python scripts/refresh_sales.py --strict --discovery-limit 25 --max-new 6
+        run: >-
+          python scripts/refresh_sales.py --strict --discovery-limit 8 --max-new 12
+          --max-private 6 --max-apartment-only 1 --new-build-detail-limit 30
+          --max-new-build-projects 18 --max-new-build-additions 6
+          --max-affordable-projects 4 --max-affordable-additions 2
+          --min-new-build-sources 2
 
       - name: Run tests
         run: pytest -q
@@ -65,12 +71,12 @@ jobs:
       - name: Persist refreshed source data
         shell: bash
         run: |
-          if [[ -z "$(git status --porcelain -- data/sales_listings.json data/sales_insights.json)" ]]; then
+          if [[ -z "$(git status --porcelain -- data/sales_listings.json data/sales_insights.json data/sales_new_build_candidates.json)" ]]; then
             echo "No source-data changes to persist."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sales_listings.json data/sales_insights.json
+          git add data/sales_listings.json data/sales_insights.json data/sales_new_build_candidates.json
           git commit -m "data: refresh sales sources $(TZ=Europe/Dublin date +%F)"
           git push
