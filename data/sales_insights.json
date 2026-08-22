@@ -40,8 +40,8 @@
     "source": "Automated sales refresh",
     "title": "每日来源刷新：新增新房 0、二手房 1，变化 0",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 164 个页面，成功核验 74 个。新房目录 5/5 个可访问，核验 19/37 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 29/78 个新候选详情页。新增：3 Saint Vincent Street West, Inchicore, Dublin 8, D08R8H2；变化：未发现已跟踪房源的明确价格或状态变化；1 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 166 个页面，成功核验 80 个。新房目录 5/5 个可访问，核验 19/36 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 35/83 个新候选详情页。新增：21 Kilclare Gardens, Tallaght, Dublin 24；变化：未发现已跟踪房源的明确价格或状态变化；1 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-08-21"
+    "verified_at": "2026-08-22"
   }
 ]
