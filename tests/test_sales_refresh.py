@@ -225,6 +225,36 @@ def test_myhome_detail_does_not_mistake_size_label_for_property_type():
     assert updated.property_type == "House"
 
 
+def test_page_refresh_sets_changed_at_only_for_substantive_changes():
+    item = SalesListing.model_validate(
+        {
+            **_listing("Tracked", address="1 Main Street, Dublin 12", price=350_000).model_dump(mode="json"),
+            "url": "https://www.daft.ie/for-sale/tracked/123",
+            "bedrooms": 3,
+            "bathrooms": 1,
+            "property_type": "Terrace",
+            "changed_at": "2026-08-01",
+        }
+    )
+
+    unchanged, changes = _apply_page_facts(
+        item,
+        "€350,000 3 Bed 1 Bath Terrace Dublin 12",
+        "2026-09-05",
+    )
+    assert changes == []
+    assert unchanged.verified_at == "2026-09-05"
+    assert unchanged.changed_at == "2026-08-01"
+
+    reduced, changes = _apply_page_facts(
+        item,
+        "€340,000 3 Bed 1 Bath Terrace Dublin 12",
+        "2026-09-05",
+    )
+    assert any("price_eur 350000 → 340000" in change for change in changes)
+    assert reduced.changed_at == "2026-09-05"
+
+
 def test_mix_policy_limits_and_deduplicates_resales_without_removing_them():
     rows = [
         _listing("Expensive", address="3 Main Street", price=390_000),
