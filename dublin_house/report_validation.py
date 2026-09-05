@@ -100,7 +100,6 @@ def validate_report_html(
     required = [
         "更新日期：",
         "信息核验：",
-        "本期重点：",
         "本期条目",
         "独立地图位置",
         "当前重点",
@@ -129,6 +128,8 @@ def validate_report_html(
         )
 
     missing = [token for token in required if token not in normalized_html]
+    if not any(token in normalized_html for token in ("本期重点：", "当前库存重点：")):
+        missing.append("重点摘要（本期重点：或当前库存重点：）")
     if missing:
         raise ValueError("Email standard validation failed; missing: " + ", ".join(missing))
 
