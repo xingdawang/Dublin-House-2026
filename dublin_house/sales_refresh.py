@@ -719,6 +719,13 @@ def _refresh_insights(
     insights_path.write_text(json.dumps(existing, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def _is_legacy_daft_unit_candidate(item: SalesListing) -> bool:
+    return (
+        item.source == "Daft New Homes Dublin"
+        and "is for sale on daft.ie" in item.title.casefold()
+    )
+
+
 def refresh_sales_data(
     *,
     listings_file: str | Path = "data/sales_listings.json",
@@ -742,8 +749,16 @@ def refresh_sales_data(
     listings_path = Path(listings_file)
     insights_path = Path(insights_file)
     candidates_path = Path(new_build_candidates_file)
-    current = [SalesListing.model_validate(row) for row in load_json_rows(listings_path)]
-    candidate_baseline = load_candidate_file(candidates_path)
+    current = [
+        item
+        for item in (SalesListing.model_validate(row) for row in load_json_rows(listings_path))
+        if not _is_legacy_daft_unit_candidate(item)
+    ]
+    candidate_baseline = [
+        item
+        for item in load_candidate_file(candidates_path)
+        if not _is_legacy_daft_unit_candidate(item)
+    ]
     verified_date = dublin_now().strftime("%Y-%m-%d")
     result = RefreshResult()
     refreshed: list[SalesListing] = []
