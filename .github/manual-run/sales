@@ -1,1 +1,1 @@
-2026-09-06 Europe/Dublin：第三次正式重跑，用于验证 Daft New Homes 项目级去重。仅保留开发项目主链接，清理上一轮误入库的户型级记录，期望 Fenwood Park、Grainger Woods 等以项目级进入差异摘要。全部测试与预检通过后正式发送。
+2026-09-06 Europe/Dublin：最终验证重跑。已完成 Daft 项目级链接过滤、跨来源项目名归一化（Avenlea/Redford 去重）及 Daft 地址清洗。要求全部测试、地图/CID、SMTP 预检通过后发送最终销售日报。
