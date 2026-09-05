@@ -239,6 +239,15 @@ def discover_project_links(
         absolute = _clean_url(urljoin(catalog_url, str(anchor["href"])))
         if absolute in seen or not source.accepts(absolute):
             continue
+        anchor_text = " ".join(anchor.stripped_strings).strip()
+        if source.name == "Daft New Homes Dublin" and re.match(
+            r"^(?:€|price\s+on\s+application\b)",
+            anchor_text,
+            flags=re.IGNORECASE,
+        ):
+            # Daft development cards contain one project-level link followed by
+            # multiple unit/property-type links. Keep the project page only.
+            continue
         if south_only:
             node = anchor
             context = ""
@@ -374,6 +383,11 @@ def parse_new_build_detail(
         return None
 
     title = _page_title(soup)
+    if source.name == "Daft New Homes Dublin":
+        root = soup.find("main") or soup.body or soup
+        heading = root.find("h1")
+        if heading:
+            title = " ".join(heading.stripped_strings).strip()
     if not title or len(title) > 120:
         return None
     location = _location_text(BeautifulSoup(html, "html.parser"), title)
