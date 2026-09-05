@@ -92,7 +92,11 @@ def test_catalog_discovers_only_south_dublin_detail_links_and_deduplicates():
 
 def test_default_sources_include_daft_new_homes_dublin():
     daft = next(source for source in DEFAULT_NEW_BUILD_SOURCES if source.name == "Daft New Homes Dublin")
-    assert daft.catalog_urls == ("https://www.daft.ie/new-homes-for-sale/dublin",)
+    assert daft.catalog_urls == (
+        "https://www.daft.ie/new-homes-for-sale/adamstown-dublin",
+        "https://www.daft.ie/new-homes-for-sale/west-co-dublin-dublin",
+        "https://www.daft.ie/new-homes-for-sale/dublin",
+    )
     assert daft.accepts(
         "https://www.daft.ie/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049"
     )
