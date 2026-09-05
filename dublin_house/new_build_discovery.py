@@ -160,7 +160,11 @@ DEFAULT_NEW_BUILD_SOURCES = (
         name="Daft New Homes Dublin",
         provider="Daft.ie New Homes",
         scheme="sales_agent_new_build",
-        catalog_urls=("https://www.daft.ie/new-homes-for-sale/dublin",),
+        catalog_urls=(
+            "https://www.daft.ie/new-homes-for-sale/adamstown-dublin",
+            "https://www.daft.ie/new-homes-for-sale/west-co-dublin-dublin",
+            "https://www.daft.ie/new-homes-for-sale/dublin",
+        ),
         detail_path_pattern=r"/new-home-for-sale/[^/]+/\d+/?",
         authority_rank=35,
     ),
