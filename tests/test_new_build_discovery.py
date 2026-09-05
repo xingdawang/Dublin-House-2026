@@ -107,7 +107,8 @@ def test_daft_new_homes_catalog_discovers_south_dublin_detail_pages():
     html = """
     <main>
       <article><h2>Grainger Woods</h2><p>Adamstown, Lucan, Co. Dublin</p>
-        <a href="/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049">View</a>
+        <a href="/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049">Grainger Woods, Adamstown, Lucan, Co. Dublin From €450,000</a>
+        <a href="/new-home-for-sale/4-bedroom-mid-terrace-house-grainger-woods-adamstown-lucan-co-dublin/6554130">€635,000 4 Bed 4 Bath Terrace</a>
       </article>
       <article><h2>North Project</h2><p>Swords, Dublin 15</p>
         <a href="/new-home-for-sale/north-project-swords/1234567">View</a>
@@ -122,6 +123,29 @@ def test_daft_new_homes_catalog_discovers_south_dublin_detail_pages():
     ) == [
         "https://www.daft.ie/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049"
     ]
+
+
+def test_daft_detail_prefers_clean_h1_over_marketing_og_title():
+    daft = next(source for source in DEFAULT_NEW_BUILD_SOURCES if source.name == "Daft New Homes Dublin")
+    html = """
+    <html><head>
+      <meta property="og:title" content="Fenwood Park , Fenwood Park , Lucan, Co. Dublin is for sale on Daft.ie">
+      <meta name="description" content="New development in Lucan with 2, 3 and 4 bedroom homes from €460,000.">
+    </head><body><main>
+      <h1>Fenwood Park , Lucan, Co. Dublin</h1>
+      <p>11 Property Types From €460,000 New Development</p>
+      <p>Register your interest in 2, 3 and 4 bedroom houses and duplexes in Lucan.</p>
+    </main></body></html>
+    """
+    item = parse_new_build_detail(
+        html,
+        "https://www.daft.ie/new-home-for-sale/fenwood-park-lucan-co-dublin/6659233",
+        daft,
+        "2026-09-06",
+    )
+    assert item is not None
+    assert item.title == "Fenwood Park , Lucan, Co. Dublin"
+    assert "is for sale on Daft.ie" not in item.title
 
 
 def test_public_sitemap_can_be_used_as_a_detail_discovery_catalog():
