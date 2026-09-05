@@ -14,7 +14,7 @@ from .report_validation import validate_direct_url
 
 
 NEW_BUILD_SCHEMES = {"coming_soon", "developer_new_build", "sales_agent_new_build"}
-DEFAULT_MAX_NEW_BUILD_PROJECTS = 18
+DEFAULT_MAX_NEW_BUILD_PROJECTS = 24
 DEFAULT_MAX_NEW_BUILD_ADDITIONS = 6
 DEFAULT_MAX_AFFORDABLE_PROJECTS = 4
 DEFAULT_MAX_AFFORDABLE_ADDITIONS = 2
