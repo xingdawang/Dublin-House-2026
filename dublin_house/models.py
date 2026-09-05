@@ -35,6 +35,7 @@ class SalesListing(BaseModel):
     eligibility: str = ""
     notes: str = ""
     verified_at: str
+    changed_at: str | None = None
     latitude: float | None = None
     longitude: float | None = None
 
