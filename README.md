@@ -65,7 +65,7 @@ Google Static Maps URL只用于运行时下载 PNG，不会写入最终邮件 HT
 ```bash
 python scripts/refresh_sales.py --strict --discovery-limit 8 --max-new 12 \
   --max-private 6 --max-apartment-only 1 \
-  --max-new-build-projects 18 --max-new-build-additions 6 \
+  --max-new-build-projects 24 --max-new-build-additions 6 \
   --max-affordable-projects 4 --max-affordable-additions 2 \
   --min-new-build-sources 2
 pytest -q
