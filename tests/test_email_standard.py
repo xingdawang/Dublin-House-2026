@@ -36,6 +36,18 @@ def test_report_accepts_canonical_static_map_format():
     )
 
 
+def test_report_accepts_delta_first_inventory_focus_label():
+    html = CANONICAL_SALES_HTML.replace(
+        "本期重点：两个项目即将开放。",
+        "当前库存重点：两个项目持续跟踪。",
+    )
+    validate_report_html(
+        html,
+        overview_title="所有房源位置总览",
+        require_static_map=True,
+    )
+
+
 def test_report_rejects_missing_focus_summary():
     html = CANONICAL_SALES_HTML.replace("本期重点：两个项目即将开放。", "")
     with pytest.raises(ValueError):
