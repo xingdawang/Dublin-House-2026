@@ -1,1 +1,1 @@
-2026-09-06 Europe/Dublin：用户要求立即重跑销售日报，用于验证 delta-first 邮件、Daft New Homes 新房发现、changed_at/verified_at 区分、地图与完整预检。通过后正式发送本次销售邮件。
+2026-09-06 Europe/Dublin：第二次正式重跑销售日报。已同步 delta-first 邮件校验标准，并将新房容量由 18 提升到 24，验证 Daft New Homes 新项目能进入正式日报。刷新、测试、地图/CID、SMTP 预检全部通过后正式发送。
