@@ -73,7 +73,9 @@ python scripts/run_sales.py --preflight
 python scripts/run_sales.py --send
 ```
 
-销售刷新器每天从开发商、销售代理和 Affordable Homes 的公开目录发现南都柏林项目，只有可访问的具体项目详情页才进入候选池。范围覆盖 Dublin 2、4、6、8、10、12、14、16、18、20、22、24，并补充 Adamstown、Lucan、Tallaght、Cherrywood、Shankill、Kilternan、Stillorgan 等南部区域。二手 House 同样逐区扫描这 12 个邮区（D6 同时补充 D6W），Daft 受限时使用 MyHome 公开结构化房源作回退，候选最终仍必须通过具体详情页校验。系统排除 Sale Agreed 等失效状态，并优先跨邮区保留低价候选。新房优先 House，纯公寓仍保留少量对照。
+销售刷新器每天从开发商、销售代理、Daft New Homes 和 Affordable Homes 的公开目录发现南都柏林项目，只有可访问的具体项目详情页才进入候选池。Daft New Homes 优先检查 Adamstown、West Co. Dublin，再补充全 Dublin 目录，用于发现开发商／代理目录尚未收录的新项目；跨来源仍按项目名去重，并优先保留开发商或直接代理详情页。范围覆盖 Dublin 2、4、6、8、10、12、14、16、18、20、22、24，并补充 Adamstown、Lucan、Tallaght、Cherrywood、Shankill、Kilternan、Stillorgan 等南部区域。二手 House 同样逐区扫描这 12 个邮区（D6 同时补充 D6W），Daft 受限时使用 MyHome 公开结构化房源作回退，候选最终仍必须通过具体详情页校验。系统排除 Sale Agreed 等失效状态，并优先跨邮区保留低价候选。新房优先 House，纯公寓仍保留少量对照。
+
+日报顶部先展示“昨日 → 今日实质变化”，包括新增、下架／失效、降价、涨价、状态和其他字段变化；完整库存放在其后。`verified_at` 仅表示最近成功核验日期，`changed_at` 表示最近一次确认到价格、户型、房型、BER 或销售状态发生实质变化的日期，两者不得混淆。
 
 刷新成功后，GitHub Actions 会把 `data/sales_listings.json`、`data/sales_insights.json` 和 `data/sales_new_build_candidates.json` 提交回默认分支，作为下一轮比较基线。
 
