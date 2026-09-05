@@ -11,7 +11,7 @@ def test_sales_workflow_discovers_new_builds_then_tests_preflights_sends_and_per
     assert "python scripts/refresh_sales.py --strict" in workflow
     assert "--discovery-limit 8 --max-new 12" in workflow
     assert "--max-private 6 --max-apartment-only 1" in workflow
-    assert "--max-new-build-projects 18 --max-new-build-additions 6" in workflow
+    assert "--max-new-build-projects 24 --max-new-build-additions 6" in workflow
     assert "--min-new-build-sources 2" in workflow
     assert "data/sales_new_build_candidates.json" in workflow
     positions = [
