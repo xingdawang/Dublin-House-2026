@@ -486,6 +486,7 @@ def merge_candidates(
                         "status": incoming_status,
                         "address": incoming_address,
                         "region": incoming_region,
+                        "changed_at": old.changed_at,
                     }
                 )
             by_key[key] = (incoming, authority_rank)
