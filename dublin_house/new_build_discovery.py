@@ -390,9 +390,14 @@ def parse_new_build_detail(
             title = " ".join(heading.stripped_strings).strip()
     if not title or len(title) > 120:
         return None
-    location = _location_text(BeautifulSoup(html, "html.parser"), title)
-    region = south_dublin_region(location or evidence) or "South Dublin"
-    address = location if title.casefold() in location.casefold() else f"{title}, {location or region}"
+    if source.name == "Daft New Homes Dublin":
+        location = title
+        region = south_dublin_region(title or evidence) or "South Dublin"
+        address = title
+    else:
+        location = _location_text(BeautifulSoup(html, "html.parser"), title)
+        region = south_dublin_region(location or evidence) or "South Dublin"
+        address = location if title.casefold() in location.casefold() else f"{title}, {location or region}"
 
     primary = evidence[:6000]
     prices = [int(value.replace(",", "")) for value in PRICE_RE.findall(primary)]
@@ -425,8 +430,15 @@ def parse_new_build_detail(
 
 
 def project_key(item: SalesListing) -> str:
-    title = item.title.casefold()
+    title = item.title.casefold().strip()
+    # Daft commonly appends the locality to a development H1 (for example
+    # "Avenlea, Adamstown, Co. Dublin") while developer/agent sources use only
+    # the project name. Normalize the locality suffix so the same development
+    # deduplicates across sources.
+    if "," in title:
+        title = title.split(",", 1)[0].strip()
     title = re.sub(r"\b(?:phase|new phase)\s*\d+\b", "", title)
+    title = re.sub(r"\s+development\s*$", "", title)
     title = re.sub(r"[^a-z0-9]+", "", title)
     return title
 
