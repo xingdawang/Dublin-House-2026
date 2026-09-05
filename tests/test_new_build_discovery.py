@@ -5,6 +5,7 @@ import pytest
 
 from dublin_house.models import SalesListing
 from dublin_house.new_build_discovery import (
+    DEFAULT_NEW_BUILD_SOURCES,
     NewBuildSource,
     discover_project_links,
     is_south_dublin,
@@ -87,6 +88,36 @@ def test_catalog_discovers_only_south_dublin_detail_links_and_deduplicates():
         SAVILLS,
         south_only=True,
     ) == ["https://virtual.savills.ie/developments/the-glen/"]
+
+
+def test_default_sources_include_daft_new_homes_dublin():
+    daft = next(source for source in DEFAULT_NEW_BUILD_SOURCES if source.name == "Daft New Homes Dublin")
+    assert daft.catalog_urls == ("https://www.daft.ie/new-homes-for-sale/dublin",)
+    assert daft.accepts(
+        "https://www.daft.ie/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049"
+    )
+
+
+def test_daft_new_homes_catalog_discovers_south_dublin_detail_pages():
+    daft = next(source for source in DEFAULT_NEW_BUILD_SOURCES if source.name == "Daft New Homes Dublin")
+    html = """
+    <main>
+      <article><h2>Grainger Woods</h2><p>Adamstown, Lucan, Co. Dublin</p>
+        <a href="/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049">View</a>
+      </article>
+      <article><h2>North Project</h2><p>Swords, Dublin 15</p>
+        <a href="/new-home-for-sale/north-project-swords/1234567">View</a>
+      </article>
+    </main>
+    """
+    assert discover_project_links(
+        html,
+        "https://www.daft.ie/new-homes-for-sale/dublin",
+        daft,
+        south_only=True,
+    ) == [
+        "https://www.daft.ie/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049"
+    ]
 
 
 def test_public_sitemap_can_be_used_as_a_detail_discovery_catalog():
