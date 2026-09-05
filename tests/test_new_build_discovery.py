@@ -145,6 +145,7 @@ def test_daft_detail_prefers_clean_h1_over_marketing_og_title():
     )
     assert item is not None
     assert item.title == "Fenwood Park , Lucan, Co. Dublin"
+    assert item.address == "Fenwood Park , Lucan, Co. Dublin"
     assert "is for sale on Daft.ie" not in item.title
 
 
@@ -241,6 +242,12 @@ def test_detail_parser_uses_public_metadata_when_page_body_is_script_rendered():
     assert item.property_type == "House"
     assert item.bedrooms == 2
     assert item.scheme == "coming_soon"
+
+
+def test_project_key_deduplicates_daft_locality_suffix_against_official_name():
+    official = _project("Avenlea", scheme="developer_new_build", url_host="developer.example")
+    daft = _project("Avenlea, Adamstown, Co. Dublin", url_host="www.daft.ie")
+    assert project_key(official) == project_key(daft) == "avenlea"
 
 
 def test_cross_source_merge_prefers_developer_detail_page():
