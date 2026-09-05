@@ -232,6 +232,16 @@ def _meta_description(html: str) -> str:
     return " ".join(str(node.get("content") or "").split()) if node else ""
 
 
+def _listing_changes(before: SalesListing, after: SalesListing) -> list[str]:
+    changed: list[str] = []
+    for key in ("price_eur", "bedrooms", "bathrooms", "property_type", "status", "ber"):
+        old_value = getattr(before, key)
+        new_value = getattr(after, key)
+        if old_value != new_value:
+            changed.append(f"{before.title}: {key} {old_value!r} → {new_value!r}")
+    return changed
+
+
 def _apply_page_facts(
     item: SalesListing,
     text: str,
@@ -268,10 +278,9 @@ def _apply_page_facts(
                     data["property_type"] = candidate_type
 
     updated = SalesListing.model_validate(data)
-    changed = []
-    for key in ("price_eur", "bedrooms", "bathrooms", "property_type", "status"):
-        if before.get(key) != getattr(updated, key):
-            changed.append(f"{item.title}: {key} {before.get(key)!r} → {getattr(updated, key)!r}")
+    changed = _listing_changes(item, updated)
+    if changed:
+        updated = updated.model_copy(update={"changed_at": verified_date})
     return updated, changed
 
 
@@ -655,6 +664,29 @@ def _refresh_insights(
     change_text = "；".join(result.changed[:8]) if result.changed else "未发现已跟踪房源的明确价格或状态变化"
     added_text = "、".join(result.added[:8]) if result.added else "无新增入选房源"
     warning_text = f"；{len(result.warnings)} 个来源未完成刷新，已保留原核验日期" if result.warnings else ""
+
+    price_down = 0
+    price_up = 0
+    status_changes = 0
+    other_changes = 0
+    for change in result.changed:
+        if ": price_eur " in change:
+            match = re.search(r"price_eur (None|\d+) → (None|\d+)", change)
+            if match and match.group(1) != "None" and match.group(2) != "None":
+                before_price = int(match.group(1))
+                after_price = int(match.group(2))
+                if after_price < before_price:
+                    price_down += 1
+                elif after_price > before_price:
+                    price_up += 1
+                else:
+                    other_changes += 1
+            else:
+                other_changes += 1
+        elif ": status " in change:
+            status_changes += 1
+        else:
+            other_changes += 1
     source_summary = (
         f"新房目录 {len(result.new_build_sources_verified)}/{result.new_build_sources_checked} 个可访问，"
         f"核验 {result.new_build_candidates_verified}/{result.new_build_candidates_checked} 个南都柏林项目详情页。"
@@ -665,14 +697,21 @@ def _refresh_insights(
         section="price_change",
         source="Automated sales refresh",
         title=(
-            f"每日来源刷新：新增新房 {len(result.new_build_added)}、"
-            f"二手房 {len(result.resale_added)}，变化 {len(result.changed)}"
+            "今日无实质更新"
+            if not result.added and not result.unavailable and not result.changed
+            else (
+                f"今日变化：新增 {len(result.added)}、下架/失效 {len(result.unavailable)}、"
+                f"降价 {price_down}、涨价 {price_up}、状态变化 {status_changes}、"
+                f"其他字段变化 {other_changes}"
+            )
         ),
         url=discovery_url,
         status="自动刷新结果",
         summary=(
             f"本轮检查 {result.checked} 个页面，成功核验 {result.verified} 个。{source_summary}"
-            f"新增：{added_text}；变化：{change_text}{warning_text}。"
+            f"新增：{added_text}；下架/失效："
+            f"{'、'.join(result.unavailable[:8]) if result.unavailable else '无'}；"
+            f"变化：{change_text}{warning_text}。"
         ),
         verified_at=verified_date,
     )
@@ -717,7 +756,14 @@ def refresh_sales_data(
                 response = _fetch(client, str(item.url))
                 if response.status_code == 404:
                     result.unavailable.append(item.title)
-                    refreshed.append(item.model_copy(update={"status": "Unavailable / Watchlist"}))
+                    refreshed.append(
+                        item.model_copy(
+                            update={
+                                "status": "Unavailable / Watchlist",
+                                "changed_at": verified_date,
+                            }
+                        )
+                    )
                     continue
                 response.raise_for_status()
                 validate_direct_url(str(response.url), title=item.display_title)
@@ -735,7 +781,14 @@ def refresh_sales_data(
                 if item.scheme == "private_sale" and any(
                     token in reason for token in ("search page", "search/category page", "category page")
                 ):
-                    refreshed.append(item.model_copy(update={"status": "Unavailable / Watchlist"}))
+                    refreshed.append(
+                        item.model_copy(
+                            update={
+                                "status": "Unavailable / Watchlist",
+                                "changed_at": verified_date,
+                            }
+                        )
+                    )
                     result.unavailable.append(item.title)
                 else:
                     refreshed.append(item)
@@ -888,14 +941,29 @@ def refresh_sales_data(
         max_private_sales=max_private_sales,
         max_apartment_only=max_apartment_only,
     )
+    current_projects_by_key = {
+        project_key(item): item
+        for item in current
+        if item.scheme in discoverable_schemes
+    }
+    refreshed_with_change_dates: list[SalesListing] = []
+    for item in refreshed:
+        if item.scheme in discoverable_schemes:
+            previous = current_projects_by_key.get(project_key(item))
+            if previous is not None:
+                project_changes = _listing_changes(previous, item)
+                if project_changes:
+                    result.changed.extend(project_changes)
+                    item = item.model_copy(update={"changed_at": verified_date})
+        refreshed_with_change_dates.append(item)
+    refreshed = refreshed_with_change_dates
+
     result.resale_added = [
         item.title
         for item in refreshed
         if item.scheme == "private_sale" and not item.is_closed and str(item.url) not in existing_urls
     ]
-    existing_project_keys = {
-        project_key(item) for item in current if item.scheme in discoverable_schemes
-    }
+    existing_project_keys = set(current_projects_by_key)
     result.new_build_added = [
         item.title
         for item in refreshed
@@ -904,6 +972,14 @@ def refresh_sales_data(
         and project_key(item) not in existing_project_keys
     ]
     result.added = result.new_build_added + result.resale_added
+
+    added_titles = set(result.added)
+    refreshed = [
+        item.model_copy(update={"changed_at": verified_date})
+        if item.title in added_titles and not item.changed_at
+        else item
+        for item in refreshed
+    ]
 
     if strict and result.verified == 0:
         raise RuntimeError("Sales refresh failed: no source page could be verified")
