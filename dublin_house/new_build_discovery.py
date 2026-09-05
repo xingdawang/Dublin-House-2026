@@ -499,7 +499,10 @@ def merge_candidates(
                     incoming_property_type = old.property_type
                 incoming_address = incoming.address
                 incoming_region = incoming.region
-                if ", ," in incoming_address or len(incoming_address) < len(incoming.title) + 4:
+                if ", ," in incoming_address or (
+                    len(incoming_address) < len(incoming.title) + 4
+                    and not is_south_dublin(incoming_address)
+                ):
                     incoming_address = old.address
                     incoming_region = old.region
                 incoming = incoming.model_copy(
