@@ -117,10 +117,19 @@ def organize(rows: list[SalesListing]) -> dict[str, list[SalesListing]]:
 def organize_insights(rows: list[SalesInsight]) -> dict[str, list[SalesInsight]]:
     buckets = {key: [] for key in SECTIONS}
     for insight in rows:
+        if insight.source == "Automated sales refresh":
+            continue
         buckets[insight.section].append(insight)
     for items in buckets.values():
         items.sort(key=lambda x: (x.verified_at, x.title), reverse=True)
     return buckets
+
+
+def latest_refresh_insight(rows: list[SalesInsight]) -> SalesInsight | None:
+    automated = [item for item in rows if item.source == "Automated sales refresh"]
+    if not automated:
+        return None
+    return max(automated, key=lambda item: (item.verified_at, item.title))
 
 
 def build_sales_focus(buckets: dict[str, list[SalesListing]]) -> str:
@@ -254,6 +263,7 @@ def generate(
 
     buckets = organize(rows)
     insight_buckets = organize_insights(insights)
+    latest_refresh = latest_refresh_insight(insights)
     sections, map_labels = build_sections_and_map_index(buckets, insight_buckets)
     summary_groups = build_summary_groups(map_labels)
     generated_at = dublin_now()
@@ -282,11 +292,18 @@ def generate(
         "sales_report.html.j2",
         updated_date=generated_at.strftime("%Y-%m-%d"),
         verified_label=f"{generated_at:%Y-%m-%d} {_verification_period(generated_at.hour)}",
+        daily_change_title=latest_refresh.title if latest_refresh else "暂无自动刷新摘要",
+        daily_change_summary=(
+            latest_refresh.summary
+            if latest_refresh
+            else "当前没有可用的自动刷新结果，以下展示最近一次持久化库存。"
+        ),
+        daily_change_has_updates=bool(latest_refresh and latest_refresh.title != "今日无实质更新"),
         focus_summary=build_sales_focus(buckets),
         total_count=sum(len(items) for items in buckets.values()),
         location_count=len(map_labels),
         focus_count=active_count,
-        insight_count=len(insights),
+        insight_count=sum(1 for item in insights if item.source != "Automated sales refresh"),
         summary_groups=summary_groups,
         sections=sections,
         map_overview_url=map_overview_url,
