@@ -38,10 +38,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日无实质更新",
+    "title": "今日变化：新增 1、下架/失效 0、降价 0、涨价 0、状态变化 0、其他字段变化 0",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 180 个页面，成功核验 85 个。新房目录 6/6 个可访问，核验 20/35 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 34/91 个新候选详情页。新增：无新增入选房源；下架/失效：无；变化：未发现已跟踪房源的明确价格或状态变化；2 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 189 个页面，成功核验 89 个。新房目录 6/6 个可访问，核验 24/39 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 34/97 个新候选详情页。新增：Brennan Park；下架/失效：无；变化：未发现已跟踪房源的明确价格或状态变化；1 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-09-15"
+    "verified_at": "2026-09-16"
   }
 ]
