@@ -38,10 +38,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日变化：新增 1、下架/失效 0、降价 0、涨价 0、状态变化 0、其他字段变化 0",
+    "title": "今日变化：新增 3、下架/失效 0、降价 0、涨价 1、状态变化 2、其他字段变化 1",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 189 个页面，成功核验 89 个。新房目录 6/6 个可访问，核验 24/39 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 34/97 个新候选详情页。新增：Brennan Park；下架/失效：无；变化：未发现已跟踪房源的明确价格或状态变化；1 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 178 个页面，成功核验 85 个。新房目录 6/6 个可访问，核验 23/41 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 30/79 个新候选详情页。新增：74 De Selby Crescent, Citywest, Dublin 24、2 Thomas Davis Street West, Inchicore, Dublin 8, D08N9DH、31 Oakcourt Park, , Palmerstown, Dublin 20；下架/失效：无；变化：21 Kilclare Gardens, Tallaght, Dublin 24: property_type 'House' → 'Semi-D'；21 Kilclare Gardens, Tallaght, Dublin 24: status 'Current Listing' → 'Sale Agreed'；3 Saint Vincent Street West, Inchicore, Dublin 8, D08R8H2: price_eur 325000 → 470000；3 Saint Vincent Street West, Inchicore, Dublin 8, D08R8H2: status 'Current Listing' → 'Sale Agreed'；1 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-09-16"
+    "verified_at": "2026-09-17"
   }
 ]
