@@ -38,10 +38,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日变化：新增 1、下架/失效 0、降价 0、涨价 0、状态变化 0、其他字段变化 2",
+    "title": "今日无实质更新",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 193 个页面，成功核验 90 个。新房目录 6/6 个可访问，核验 23/41 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 35/98 个新候选详情页。新增：14 Drumcairn Park, Dublin 24, Tallaght, Dublin 24, D24NH6A；下架/失效：无；变化：Grainger Woods, Adamstown, Lucan, Co. Dublin: ber 'UNKNOWN' → 'A3'；Fenwood Park , Lucan, Co. Dublin: ber 'UNKNOWN' → 'A2'；1 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 177 个页面，成功核验 84 个。新房目录 6/6 个可访问，核验 23/41 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 30/78 个新候选详情页。新增：无新增入选房源；下架/失效：无；变化：未发现已跟踪房源的明确价格或状态变化；2 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-09-18"
+    "verified_at": "2026-09-19"
   }
 ]
