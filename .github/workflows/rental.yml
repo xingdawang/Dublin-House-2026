@@ -5,9 +5,6 @@ on:
   push:
     paths:
       - ".github/manual-run/rental"
-  schedule:
-    - cron: "0 7 * * 1"
-      timezone: "Europe/Dublin"
 
 permissions:
   contents: write
