@@ -13,7 +13,7 @@ Codex 接手时先阅读：
 | 任务 | 频率 | GitHub Actions | 命令入口 |
 |---|---|---|---|
 | **住房销售日报** | 每天 07:00（Europe/Dublin） | `.github/workflows/sales.yml` | `scripts/run_sales.py` |
-| **住房租赁周报** | 每周一 07:00（Europe/Dublin） | `.github/workflows/rental.yml` | `scripts/run_rental.py` |
+| **住房租赁周报** | **自动发送已暂停，仅手动运行** | `.github/workflows/rental.yml` | `scripts/run_rental.py` |
 
 GitHub Actions 是唯一正式调度源。不要同时启用另一套 ChatGPT、系统 cron 或本地任务发送同一邮件。
 
@@ -73,13 +73,15 @@ python scripts/run_sales.py --preflight
 python scripts/run_sales.py --send
 ```
 
-销售刷新器每天从开发商、销售代理、Daft New Homes 和 Affordable Homes 的公开目录发现南都柏林项目，只有可访问的具体项目详情页才进入候选池。Daft New Homes 优先检查 Adamstown、West Co. Dublin，再补充全 Dublin 目录，用于发现开发商／代理目录尚未收录的新项目；跨来源仍按项目名去重，并优先保留开发商或直接代理详情页。范围覆盖 Dublin 2、4、6、8、10、12、14、16、18、20、22、24，并补充 Adamstown、Lucan、Tallaght、Cherrywood、Shankill、Kilternan、Stillorgan 等南部区域。二手 House 同样逐区扫描这 12 个邮区（D6 同时补充 D6W），Daft 受限时使用 MyHome 公开结构化房源作回退，候选最终仍必须通过具体详情页校验。系统排除 Sale Agreed 等失效状态，并优先跨邮区保留低价候选。新房优先 House，纯公寓仍保留少量对照。
+销售刷新器每天从开发商、销售代理、Daft New Homes 和 Affordable Homes 的公开目录发现南都柏林项目，只有可访问的具体项目详情页才进入候选池。Daft New Homes 优先检查 Adamstown、Lucan、Cherrywood、West Co. Dublin，再补充全 Dublin 目录，用于发现开发商／代理目录尚未收录的新项目；跨来源仍按项目名去重，并优先保留开发商或直接代理详情页。范围覆盖 Dublin 2、4、6、8、10、12、14、16、18、20、22、24，并补充 Adamstown、Lucan、Tallaght、Cherrywood、Shankill、Kilternan、Stillorgan 等南部区域。二手 House 同样逐区扫描这 12 个邮区（D6 同时补充 D6W），Daft 受限时使用 MyHome 公开结构化房源作回退，候选最终仍必须通过具体详情页校验。系统排除 Sale Agreed 等失效状态，并优先跨邮区保留低价候选。新房优先 House，纯公寓仍保留少量对照。
 
-日报顶部先展示“昨日 → 今日实质变化”，包括新增、下架／失效、降价、涨价、状态和其他字段变化；完整库存放在其后。`verified_at` 仅表示最近成功核验日期，`changed_at` 表示最近一次确认到价格、户型、房型、BER 或销售状态发生实质变化的日期，两者不得混淆。
+日报顶部先展示“昨日 → 今日实质变化”，包括新增、公开看房／开盘／新一期、下架／失效、降价、涨价、状态和其他字段变化；公开页面抓到 Open Viewing 等事件时，会在顶部摘要和对应项目卡片中醒目标示。混合新房项目还会尽量单列 House 户型价格，避免用公寓最低价代表 House 入场价；完整库存放在其后。`verified_at` 仅表示最近成功核验日期，`changed_at` 表示最近一次确认到价格、户型、房型、BER 或销售状态发生实质变化的日期，两者不得混淆。
 
 刷新成功后，GitHub Actions 会把 `data/sales_listings.json`、`data/sales_insights.json` 和 `data/sales_new_build_candidates.json` 提交回默认分支，作为下一轮比较基线。
 
 ## 租赁周报
+
+> 当前自动定时邮件已暂停；GitHub Actions 仅保留手动触发入口，需要恢复时再重新加入周一 schedule。
 
 覆盖：
 
