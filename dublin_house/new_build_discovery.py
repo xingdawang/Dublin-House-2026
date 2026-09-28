@@ -206,10 +206,10 @@ def discover_project_event_hints(
             if node is None:
                 break
             candidate = " ".join(node.stripped_strings)
-            if 8 <= len(candidate) <= 1200:
+            has_heading = node.find(["h1", "h2", "h3", "h4", "h5"]) is not None
+            if has_heading and 8 <= len(candidate) <= 1200:
                 context = candidate
-                if public_sales_event(context):
-                    break
+                break
         event = public_sales_event(context)
         if event:
             hints[absolute] = event
