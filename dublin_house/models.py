@@ -37,6 +37,7 @@ class SalesListing(BaseModel):
     verified_at: str
     changed_at: str | None = None
     public_event: str = ""
+    public_event_verified_at: str | None = None
     house_price_summary: str = ""
     latitude: float | None = None
     longitude: float | None = None
