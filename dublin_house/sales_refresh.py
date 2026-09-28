@@ -249,6 +249,8 @@ def _listing_changes(before: SalesListing, after: SalesListing) -> list[str]:
     ):
         old_value = getattr(before, key)
         new_value = getattr(after, key)
+        if key == "public_event" and not new_value:
+            continue
         if old_value != new_value:
             changed.append(f"{before.title}: {key} {old_value!r} → {new_value!r}")
     return changed
@@ -667,7 +669,12 @@ def _discover_new_build_candidates(
                     continue
                 hinted_event = event_hints.get(link) or event_hints.get(final_url)
                 if hinted_event and hinted_event != candidate.public_event:
-                    candidate = candidate.model_copy(update={"public_event": hinted_event})
+                    candidate = candidate.model_copy(
+                        update={
+                            "public_event": hinted_event,
+                            "public_event_verified_at": verified_date,
+                        }
+                    )
                 discovered.append((candidate, source.authority_rank))
                 result.verified += 1
                 result.new_build_candidates_verified += 1
@@ -994,7 +1001,11 @@ def refresh_sales_data(
             previous = current_projects_by_key.get(project_key(item))
             if previous is not None:
                 project_changes = _listing_changes(previous, item)
-                if item.public_event and item.public_event != previous.public_event:
+                if (
+                    item.public_event
+                    and item.public_event_verified_at == verified_date
+                    and item.public_event != previous.public_event
+                ):
                     result.events.append(f"{item.title}：{item.public_event}")
                 if project_changes:
                     result.changed.extend(project_changes)
@@ -1020,6 +1031,7 @@ def refresh_sales_data(
         if (
             item.title in result.new_build_added
             and item.public_event
+            and item.public_event_verified_at == verified_date
             and f"{item.title}：{item.public_event}" not in result.events
         ):
             result.events.append(f"{item.title}：{item.public_event}")
