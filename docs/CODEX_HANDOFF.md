@@ -102,6 +102,8 @@ python scripts/run_sales.py --send
 
 ## 5. 租赁周报
 
+当前自动周一发送已暂停；以下流程仅在手动触发时执行，除非用户明确要求恢复 schedule。
+
 ### 执行顺序
 
 ```bash
