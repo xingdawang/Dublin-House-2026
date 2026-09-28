@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   send-rental-email:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
