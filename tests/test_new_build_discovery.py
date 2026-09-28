@@ -7,8 +7,11 @@ from dublin_house.models import SalesListing
 from dublin_house.new_build_discovery import (
     DEFAULT_NEW_BUILD_SOURCES,
     NewBuildSource,
+    discover_project_event_hints,
     discover_project_links,
+    house_price_summary,
     is_south_dublin,
+    public_sales_event,
     merge_candidates,
     parse_new_build_detail,
     project_key,
@@ -94,6 +97,8 @@ def test_default_sources_include_daft_new_homes_dublin():
     daft = next(source for source in DEFAULT_NEW_BUILD_SOURCES if source.name == "Daft New Homes Dublin")
     assert daft.catalog_urls == (
         "https://www.daft.ie/new-homes-for-sale/adamstown-dublin",
+        "https://www.daft.ie/new-homes-for-sale/lucan-dublin",
+        "https://www.daft.ie/new-homes-for-sale/cherrywood-dublin",
         "https://www.daft.ie/new-homes-for-sale/west-co-dublin-dublin",
         "https://www.daft.ie/new-homes-for-sale/dublin",
     )
@@ -123,6 +128,35 @@ def test_daft_new_homes_catalog_discovers_south_dublin_detail_pages():
     ) == [
         "https://www.daft.ie/new-home-for-sale/grainger-woods-adamstown-lucan-co-dublin/6554049"
     ]
+
+
+def test_catalog_event_hint_detects_open_viewing():
+    daft = next(source for source in DEFAULT_NEW_BUILD_SOURCES if source.name == "Daft New Homes Dublin")
+    html = """
+    <main><article>
+      <h2>Fenwood Park</h2><p>Lucan, Co. Dublin</p>
+      <div>Open viewing Saturday 26th & Sunday 27th September 11am - 12pm</div>
+      <a href="/new-home-for-sale/fenwood-park-lucan-co-dublin/6659233">Fenwood Park</a>
+    </article></main>
+    """
+    hints = discover_project_event_hints(
+        html,
+        "https://www.daft.ie/new-homes-for-sale/lucan-dublin",
+        daft,
+    )
+    assert hints["https://www.daft.ie/new-home-for-sale/fenwood-park-lucan-co-dublin/6659233"] == (
+        "公开看房：Saturday 26th & Sunday 27th September · 11am - 12pm"
+    )
+
+
+def test_sales_event_and_house_price_summary_are_human_readable():
+    text = (
+        "New Launch. Open viewing Saturday 3rd October 2026 11am - 12pm. "
+        "€500,000 2 Bed 3 Bath Terrace. €550,000 3 Bed 3 Bath Terrace. "
+        "€645,000 4 Bed 3 Bath Semi-Detached."
+    )
+    assert public_sales_event(text) == "公开看房：Saturday 3rd October 2026 · 11am - 12pm"
+    assert house_price_summary(text) == "House参考：2居 €500,000起；3居 €550,000起；4居 €645,000起"
 
 
 def test_daft_detail_prefers_clean_h1_over_marketing_og_title():
