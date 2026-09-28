@@ -38,10 +38,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日无实质更新",
+    "title": "今日变化：新增 0、公开看房/开盘 7、下架/失效 0、降价 0、涨价 0、状态变化 0、其他字段变化 8",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 174 个页面，成功核验 83 个。新房目录 6/6 个可访问，核验 23/40 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 28/76 个新候选详情页。新增：无新增入选房源；下架/失效：无；变化：未发现已跟踪房源的明确价格或状态变化；1 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 176 个页面，成功核验 83 个。新房目录 6/6 个可访问，核验 23/39 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 28/76 个新候选详情页。新增：无新增入选房源；公开看房/开盘：Thorkyll Manor：即将开盘：请查看项目页确认时间、Redford：即将开盘：请查看项目页确认时间、Avenlea：即将开盘：请查看项目页确认时间、Grainger Woods, Adamstown, Lucan, Co. Dublin：即将开盘：请查看项目页确认时间、Fenwood Park , Lucan, Co. Dublin：即将开盘：请查看项目页确认时间、Brennan Park：即将开盘：请查看项目页确认时间；下架/失效：无；变化：Redford: house_price_summary '' → 'House参考：2居 €500,000起；3居 €545,000起；4居 €630,000起'；Shanganagh Vale: house_price_summary '' → 'House参考：4居 €1,200,000起'；Avenlea: house_price_summary '' → 'House参考：3居 €500,000起'；Rockville Manor: house_price_summary '' → 'House参考：2居 €400,000起；3居 €585,000起'；Ard Valley: house_price_summary '' → 'House参考：3居 €750,000起；4居 €750,000起'；Macnebury Mews: house_price_summary '' → 'House参考：3居 €700,000起'；Grainger Woods, Adamstown, Lucan, Co. Dublin: house_price_summary '' → 'House参考：3居 €550,000起；4居 €635,000起；5居 €710,000起'；Fenwood Park , Lucan, Co. Dublin: house_price_summary '' → 'House参考：2居 €500,000起；3居 €550,000起；4居 €645,000起'；2 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-09-27"
+    "verified_at": "2026-09-28"
   }
 ]
