@@ -106,6 +106,115 @@ CLOSED_TOKENS = (
     "fully sold",
 )
 
+DAY_TOKEN = r"(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"
+MONTH_TOKEN = (
+    r"(?:January|February|March|April|May|June|July|August|September|October|November|December|"
+    r"Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+)
+EVENT_DATE_RE = re.compile(
+    rf"\b{DAY_TOKEN}\s+\d{{1,2}}(?:st|nd|rd|th)?"
+    rf"(?:\s*(?:&|and)\s*(?:{DAY_TOKEN}\s+)?\d{{1,2}}(?:st|nd|rd|th)?)?"
+    rf"(?:\s+{MONTH_TOKEN})?(?:\s+20\d{{2}})?\b",
+    re.IGNORECASE,
+)
+SHORT_DATE_RE = re.compile(
+    rf"\b\d{{1,2}}(?:st|nd|rd|th)?\s+{MONTH_TOKEN}(?:\s+20\d{{2}})?\b",
+    re.IGNORECASE,
+)
+TIME_RANGE_RE = re.compile(
+    r"\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\s*(?:-|–|—|to)\s*"
+    r"\d{1,2}(?::\d{2})?\s*(?:am|pm)\b",
+    re.IGNORECASE,
+)
+SINGLE_TIME_RE = re.compile(r"\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b", re.IGNORECASE)
+PRICE_FIRST_HOUSE_RE = re.compile(
+    r"€\s*([0-9][0-9,]{4,}).{0,45}?\b([1-6])\s*Bed.{0,70}?"
+    r"(Terrace|End of Terrace|Semi-D(?:etached)?|Detached|Townhouse|House)\b",
+    re.IGNORECASE,
+)
+BED_FIRST_HOUSE_RE = re.compile(
+    r"\b([1-6])\s*(?:Bed|Bedroom)s?\b.{0,70}?"
+    r"(Terrace|End of Terrace|Semi-D(?:etached)?|Detached|Townhouse|House)\b.{0,70}?"
+    r"(?:From\s*)?€\s*([0-9][0-9,]{4,})",
+    re.IGNORECASE,
+)
+
+
+def public_sales_event(text: str) -> str:
+    """Extract a concise public viewing / launch / release signal from visible text."""
+    normalized = " ".join(text.split())
+    folded = normalized.casefold()
+    if not normalized:
+        return ""
+
+    if any(token in folded for token in ("open viewing", "open viewings", "open to view")):
+        label = "公开看房"
+    elif any(token in folded for token in ("launching on", "launch event", "new launch")):
+        label = "项目开盘"
+    elif any(token in folded for token in ("new phase", "new release", "next release")):
+        label = "新一期开放"
+    else:
+        return ""
+
+    date_match = EVENT_DATE_RE.search(normalized) or SHORT_DATE_RE.search(normalized)
+    time_match = TIME_RANGE_RE.search(normalized) or SINGLE_TIME_RE.search(normalized)
+    details = []
+    if date_match:
+        details.append(date_match.group(0))
+    if time_match:
+        details.append(time_match.group(0))
+    return f"{label}：" + (" · ".join(details) if details else "请查看项目页确认时间")
+
+
+def house_price_summary(text: str) -> str:
+    """Best-effort summary of advertised house prices, excluding apartment-only entry prices."""
+    normalized = " ".join(text.split())
+    by_bed: dict[int, int] = {}
+    for match in PRICE_FIRST_HOUSE_RE.finditer(normalized):
+        price = int(match.group(1).replace(",", ""))
+        bed = int(match.group(2))
+        if 100_000 <= price <= 5_000_000:
+            by_bed[bed] = min(price, by_bed.get(bed, price))
+    for match in BED_FIRST_HOUSE_RE.finditer(normalized):
+        bed = int(match.group(1))
+        price = int(match.group(3).replace(",", ""))
+        if 100_000 <= price <= 5_000_000:
+            by_bed[bed] = min(price, by_bed.get(bed, price))
+    if not by_bed:
+        return ""
+    return "House参考：" + "；".join(f"{bed}居 €{price:,}起" for bed, price in sorted(by_bed.items()))
+
+
+def discover_project_event_hints(
+    html: str,
+    catalog_url: str,
+    source: NewBuildSource,
+) -> dict[str, str]:
+    """Capture event text shown on project cards, e.g. Daft 'Open viewing 26 Sep 11:00'."""
+    if urlparse(catalog_url).path.casefold().endswith(".xml"):
+        return {}
+    soup = _strip_page_chrome(BeautifulSoup(html, "html.parser"))
+    hints: dict[str, str] = {}
+    for anchor in soup.find_all("a", href=True):
+        absolute = _clean_url(urljoin(catalog_url, str(anchor["href"])))
+        if not source.accepts(absolute):
+            continue
+        node = anchor
+        context = " ".join(anchor.stripped_strings)
+        for _level in range(7):
+            node = node.parent
+            if node is None:
+                break
+            candidate = " ".join(node.stripped_strings)
+            if 8 <= len(candidate) <= 1200:
+                context = candidate
+                if public_sales_event(context):
+                    break
+        event = public_sales_event(context)
+        if event:
+            hints[absolute] = event
+    return hints
+
 
 @dataclass(frozen=True)
 class NewBuildSource:
@@ -144,7 +253,7 @@ DEFAULT_NEW_BUILD_SOURCES = (
         name="Evara developments",
         provider="Evara",
         scheme="developer_new_build",
-        catalog_urls=("https://evara.ie/development-sitemap.xml",),
+        catalog_urls=("https://evara.ie/", "https://evara.ie/development-sitemap.xml"),
         detail_path_pattern=r"/development/[^/]+/?",
         authority_rank=10,
     ),
@@ -162,6 +271,8 @@ DEFAULT_NEW_BUILD_SOURCES = (
         scheme="sales_agent_new_build",
         catalog_urls=(
             "https://www.daft.ie/new-homes-for-sale/adamstown-dublin",
+            "https://www.daft.ie/new-homes-for-sale/lucan-dublin",
+            "https://www.daft.ie/new-homes-for-sale/cherrywood-dublin",
             "https://www.daft.ie/new-homes-for-sale/west-co-dublin-dublin",
             "https://www.daft.ie/new-homes-for-sale/dublin",
         ),
@@ -410,6 +521,8 @@ def parse_new_build_detail(
     notes = f"自动从 {source.name} 目录发现，并已核验项目详情页。"
     if "House" in property_type:
         notes += " 含独立住宅选项，优先保留。"
+    event = public_sales_event(primary)
+    house_summary = house_price_summary(primary)
 
     return SalesListing(
         source=source.name,
@@ -426,6 +539,8 @@ def parse_new_build_detail(
         status=status,
         notes=notes,
         verified_at=verified_date,
+        public_event=event,
+        house_price_summary=house_summary,
     )
 
 
@@ -516,11 +631,25 @@ def merge_candidates(
                         "address": incoming_address,
                         "region": incoming_region,
                         "changed_at": old.changed_at,
+                        "public_event": incoming.public_event or old.public_event,
+                        "house_price_summary": incoming.house_price_summary or old.house_price_summary,
                     }
                 )
             by_key[key] = (incoming, authority_rank)
-        elif incoming.verified_at > current[0].verified_at:
-            by_key[key] = (current[0].model_copy(update={"verified_at": incoming.verified_at}), current[1])
+        else:
+            current_item, current_rank = current
+            updates: dict[str, str] = {}
+            if incoming.verified_at > current_item.verified_at:
+                updates["verified_at"] = incoming.verified_at
+            if incoming.public_event and incoming.public_event != current_item.public_event:
+                updates["public_event"] = incoming.public_event
+            if incoming.house_price_summary and (
+                not current_item.house_price_summary
+                or len(incoming.house_price_summary) > len(current_item.house_price_summary)
+            ):
+                updates["house_price_summary"] = incoming.house_price_summary
+            if updates:
+                by_key[key] = (current_item.model_copy(update=updates), current_rank)
     return [item for item, _rank in by_key.values()]
 
 
