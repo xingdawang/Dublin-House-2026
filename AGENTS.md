@@ -9,7 +9,7 @@
 | 流水线 | GitHub Actions | 时间（Europe/Dublin） | 邮件主题 |
 |---|---|---|---|
 | 住房销售日报 | `.github/workflows/sales.yml` | 每天 07:00 | `南都柏林住房销售｜YYYY-MM-DD` |
-| 住房租赁周报 | `.github/workflows/rental.yml` | 每周一 07:00 | `南都柏林住房租赁｜YYYY-MM-DD` |
+| 住房租赁周报 | `.github/workflows/rental.yml` | **自动发送已暂停，仅手动** | `南都柏林住房租赁｜YYYY-MM-DD` |
 
 正式发送入口只能使用：
 
@@ -79,6 +79,8 @@ python scripts/run_rental.py --send
 - Sale Agreed、Offer Accepted、Sold 或 Unavailable 的二手房不得进入正式邮件。
 
 ## 5. 租赁流水线
+
+当前用户要求暂停每周自动租赁邮件，因此 `.github/workflows/rental.yml` 不得包含 schedule；只保留 workflow_dispatch 和手动标记触发。除非用户明确要求恢复，不要重新加入定时任务。
 
 主要文件：
 
