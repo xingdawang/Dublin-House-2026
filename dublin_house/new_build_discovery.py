@@ -553,6 +553,7 @@ def parse_new_build_detail(
         notes=notes,
         verified_at=verified_date,
         public_event=event,
+        public_event_verified_at=verified_date if event else None,
         house_price_summary=house_summary,
     )
 
@@ -644,7 +645,8 @@ def merge_candidates(
                         "address": incoming_address,
                         "region": incoming_region,
                         "changed_at": old.changed_at,
-                        "public_event": incoming.public_event or old.public_event,
+                        "public_event": incoming.public_event,
+                        "public_event_verified_at": incoming.public_event_verified_at,
                         "house_price_summary": incoming.house_price_summary or old.house_price_summary,
                     }
                 )
@@ -656,6 +658,7 @@ def merge_candidates(
                 updates["verified_at"] = incoming.verified_at
             if incoming.public_event and incoming.public_event != current_item.public_event:
                 updates["public_event"] = incoming.public_event
+                updates["public_event_verified_at"] = incoming.public_event_verified_at
             if incoming.house_price_summary and (
                 not current_item.house_price_summary
                 or len(incoming.house_price_summary) > len(current_item.house_price_summary)
