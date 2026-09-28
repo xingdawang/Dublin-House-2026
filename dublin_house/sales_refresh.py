@@ -22,6 +22,7 @@ from .new_build_discovery import (
     DEFAULT_NEW_BUILD_SOURCES,
     NEW_BUILD_SCHEMES,
     NewBuildSource,
+    discover_project_event_hints,
     discover_project_links,
     load_candidate_file,
     merge_candidates,
@@ -118,6 +119,7 @@ class RefreshResult:
     changed: list[str] = field(default_factory=list)
     unavailable: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    events: list[str] = field(default_factory=list)
     new_build_sources_checked: int = 0
     new_build_sources_verified: list[str] = field(default_factory=list)
     new_build_candidates_checked: int = 0
@@ -137,6 +139,7 @@ class RefreshResult:
             "changed": self.changed,
             "unavailable": self.unavailable,
             "warnings": self.warnings,
+            "events": self.events,
             "new_build_sources_checked": self.new_build_sources_checked,
             "new_build_sources_verified": self.new_build_sources_verified,
             "new_build_candidates_checked": self.new_build_candidates_checked,
@@ -234,7 +237,16 @@ def _meta_description(html: str) -> str:
 
 def _listing_changes(before: SalesListing, after: SalesListing) -> list[str]:
     changed: list[str] = []
-    for key in ("price_eur", "bedrooms", "bathrooms", "property_type", "status", "ber"):
+    for key in (
+        "price_eur",
+        "bedrooms",
+        "bathrooms",
+        "property_type",
+        "status",
+        "ber",
+        "public_event",
+        "house_price_summary",
+    ):
         old_value = getattr(before, key)
         new_value = getattr(after, key)
         if old_value != new_value:
@@ -607,6 +619,7 @@ def _discover_new_build_candidates(
         result.new_build_sources_checked += 1
         source_verified = False
         links: list[str] = []
+        event_hints: dict[str, str] = {}
         for catalog_url in source.catalog_urls:
             result.checked += 1
             try:
@@ -619,6 +632,13 @@ def _discover_new_build_candidates(
                         str(response.url),
                         source,
                         south_only=True,
+                    )
+                )
+                event_hints.update(
+                    discover_project_event_hints(
+                        response.text,
+                        str(response.url),
+                        source,
                     )
                 )
             except Exception as exc:
@@ -645,6 +665,9 @@ def _discover_new_build_candidates(
                 candidate = parse_new_build_detail(detail.text, final_url, source, verified_date)
                 if candidate is None:
                     continue
+                hinted_event = event_hints.get(link) or event_hints.get(final_url)
+                if hinted_event and hinted_event != candidate.public_event:
+                    candidate = candidate.model_copy(update={"public_event": hinted_event})
                 discovered.append((candidate, source.authority_rank))
                 result.verified += 1
                 result.new_build_candidates_verified += 1
@@ -664,6 +687,7 @@ def _refresh_insights(
     change_text = "；".join(result.changed[:8]) if result.changed else "未发现已跟踪房源的明确价格或状态变化"
     added_text = "、".join(result.added[:8]) if result.added else "无新增入选房源"
     warning_text = f"；{len(result.warnings)} 个来源未完成刷新，已保留原核验日期" if result.warnings else ""
+    event_text = "、".join(result.events[:6]) if result.events else ""
 
     price_down = 0
     price_up = 0
@@ -685,6 +709,8 @@ def _refresh_insights(
                 other_changes += 1
         elif ": status " in change:
             status_changes += 1
+        elif ": public_event " in change:
+            continue
         else:
             other_changes += 1
     source_summary = (
@@ -700,17 +726,18 @@ def _refresh_insights(
             "今日无实质更新"
             if not result.added and not result.unavailable and not result.changed
             else (
-                f"今日变化：新增 {len(result.added)}、下架/失效 {len(result.unavailable)}、"
-                f"降价 {price_down}、涨价 {price_up}、状态变化 {status_changes}、"
-                f"其他字段变化 {other_changes}"
+                f"今日变化：新增 {len(result.added)}、公开看房/开盘 {len(result.events)}、"
+                f"下架/失效 {len(result.unavailable)}、降价 {price_down}、涨价 {price_up}、"
+                f"状态变化 {status_changes}、其他字段变化 {other_changes}"
             )
         ),
         url=discovery_url,
         status="自动刷新结果",
         summary=(
             f"本轮检查 {result.checked} 个页面，成功核验 {result.verified} 个。{source_summary}"
-            f"新增：{added_text}；下架/失效："
-            f"{'、'.join(result.unavailable[:8]) if result.unavailable else '无'}；"
+            f"新增：{added_text}；"
+            f"公开看房/开盘：{event_text if event_text else '无'}；"
+            f"下架/失效：{'、'.join(result.unavailable[:8]) if result.unavailable else '无'}；"
             f"变化：{change_text}{warning_text}。"
         ),
         verified_at=verified_date,
@@ -967,6 +994,8 @@ def refresh_sales_data(
             previous = current_projects_by_key.get(project_key(item))
             if previous is not None:
                 project_changes = _listing_changes(previous, item)
+                if item.public_event and item.public_event != previous.public_event:
+                    result.events.append(f"{item.title}：{item.public_event}")
                 if project_changes:
                     result.changed.extend(project_changes)
                     item = item.model_copy(update={"changed_at": verified_date})
@@ -987,6 +1016,13 @@ def refresh_sales_data(
         and project_key(item) not in existing_project_keys
     ]
     result.added = result.new_build_added + result.resale_added
+    for item in refreshed:
+        if (
+            item.title in result.new_build_added
+            and item.public_event
+            and f"{item.title}：{item.public_event}" not in result.events
+        ):
+            result.events.append(f"{item.title}：{item.public_event}")
 
     added_titles = set(result.added)
     refreshed = [
