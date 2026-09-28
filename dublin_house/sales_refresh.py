@@ -691,7 +691,12 @@ def _refresh_insights(
 ) -> None:
     existing = load_json_rows(insights_path) if insights_path.exists() else []
     existing = [row for row in existing if row.get("source") != "Automated sales refresh"]
-    change_text = "；".join(result.changed[:8]) if result.changed else "未发现已跟踪房源的明确价格或状态变化"
+    non_event_changes = [change for change in result.changed if ": public_event " not in change]
+    change_text = (
+        "；".join(non_event_changes[:8])
+        if non_event_changes
+        else "未发现其他已跟踪房源的明确价格或状态变化"
+    )
     added_text = "、".join(result.added[:8]) if result.added else "无新增入选房源"
     warning_text = f"；{len(result.warnings)} 个来源未完成刷新，已保留原核验日期" if result.warnings else ""
     event_text = "、".join(result.events[:6]) if result.events else ""
