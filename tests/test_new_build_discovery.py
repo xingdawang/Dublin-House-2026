@@ -156,6 +156,7 @@ def test_sales_event_and_house_price_summary_are_human_readable():
         "€645,000 4 Bed 3 Bath Semi-Detached."
     )
     assert public_sales_event(text) == "公开看房：Saturday 3rd October 2026 · 11am - 12pm"
+    assert public_sales_event("Open viewing 26 Sep 11:00") == "公开看房：26 Sep · 11:00"
     assert house_price_summary(text) == "House参考：2居 €500,000起；3居 €550,000起；4居 €645,000起"
 
 
