@@ -122,11 +122,15 @@ SHORT_DATE_RE = re.compile(
     re.IGNORECASE,
 )
 TIME_RANGE_RE = re.compile(
-    r"\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\s*(?:-|–|—|to)\s*"
-    r"\d{1,2}(?::\d{2})?\s*(?:am|pm)\b",
+    r"\b(?:\d{1,2}(?::\d{2})?\s*(?:am|pm)|(?:[01]?\d|2[0-3]):[0-5]\d)"
+    r"\s*(?:-|–|—|to)\s*"
+    r"(?:\d{1,2}(?::\d{2})?\s*(?:am|pm)|(?:[01]?\d|2[0-3]):[0-5]\d)\b",
     re.IGNORECASE,
 )
-SINGLE_TIME_RE = re.compile(r"\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b", re.IGNORECASE)
+SINGLE_TIME_RE = re.compile(
+    r"\b(?:\d{1,2}(?::\d{2})?\s*(?:am|pm)|(?:[01]?\d|2[0-3]):[0-5]\d)\b",
+    re.IGNORECASE,
+)
 PRICE_FIRST_HOUSE_RE = re.compile(
     r"€\s*([0-9][0-9,]{4,}).{0,45}?\b([1-6])\s*Bed.{0,70}?"
     r"(Terrace|End of Terrace|Semi-D(?:etached)?|Detached|Townhouse|House)\b",
@@ -147,17 +151,26 @@ def public_sales_event(text: str) -> str:
     if not normalized:
         return ""
 
-    if any(token in folded for token in ("open viewing", "open viewings", "open to view")):
-        label = "公开看房"
-    elif any(token in folded for token in ("launching on", "launch event", "new launch")):
-        label = "项目开盘"
-    elif any(token in folded for token in ("new phase", "new release", "next release")):
-        label = "新一期开放"
-    else:
+    groups = (
+        ("公开看房", ("open viewing", "open viewings", "open to view")),
+        ("项目开盘", ("launching on", "launch event", "new launch")),
+        ("即将开盘", ("launching soon",)),
+        ("新一期开放", ("new phase", "new release", "next release")),
+    )
+    label = ""
+    marker_index = -1
+    for candidate_label, tokens in groups:
+        positions = [folded.find(token) for token in tokens if token in folded]
+        if positions:
+            label = candidate_label
+            marker_index = min(position for position in positions if position >= 0)
+            break
+    if not label:
         return ""
 
-    date_match = EVENT_DATE_RE.search(normalized) or SHORT_DATE_RE.search(normalized)
-    time_match = TIME_RANGE_RE.search(normalized) or SINGLE_TIME_RE.search(normalized)
+    window = normalized[max(0, marker_index - 80) : marker_index + 320]
+    date_match = EVENT_DATE_RE.search(window) or SHORT_DATE_RE.search(window)
+    time_match = TIME_RANGE_RE.search(window) or SINGLE_TIME_RE.search(window)
     details = []
     if date_match:
         details.append(date_match.group(0))
