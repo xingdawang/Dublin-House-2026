@@ -2,9 +2,6 @@ name: South Dublin Housing Rental
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - ".github/manual-run/rental"
 
 permissions:
   contents: write
@@ -15,7 +12,8 @@ concurrency:
 
 jobs:
   send-rental-email:
-    if: github.event_name != 'schedule'
+    # Rental emails are fully paused by user request. Re-enable only after an explicit resume request.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
