@@ -38,10 +38,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日变化：新增 1、公开看房/开盘 0、下架/失效 2、降价 0、涨价 1、状态变化 0、其他字段变化 0",
+    "title": "今日变化：新增 1、公开看房/开盘 0、下架/失效 2、降价 0、涨价 0、状态变化 0、其他字段变化 1",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 187 个页面，成功核验 84 个。新房目录 6/6 个可访问，核验 21/37 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 33/91 个新候选详情页。新增：30 Cloonmore Park, Tallaght, Co. Dublin, D24F7XV；公开看房/开盘：无；下架/失效：Shanganagh Vale、Clay Farm；变化：30 Cloonmore Park Tallaght, Tallaght, Dublin 24: price_eur 175000 → 425000；2 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 179 个页面，成功核验 81 个。新房目录 6/6 个可访问，核验 21/38 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 30/80 个新候选详情页。新增：3 Lindisfarne Green, Clondalkin, Dublin 22；公开看房/开盘：无；下架/失效：Shanganagh Vale、Clay Farm；变化：30 Cloonmore Park, Tallaght, Co. Dublin, D24F7XV: property_type 'House' → 'Terrace'；1 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-10-13"
+    "verified_at": "2026-10-14"
   }
 ]
