@@ -38,10 +38,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日变化：新增 2、公开看房/开盘 1、下架/失效 2、降价 0、涨价 1、状态变化 1、其他字段变化 0",
+    "title": "今日变化：新增 0、公开看房/开盘 0、下架/失效 2、降价 0、涨价 0、状态变化 0、其他字段变化 0",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 182 个页面，成功核验 86 个。新房目录 6/6 个可访问，核验 21/39 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 35/84 个新候选详情页。新增：17 Yellow Meadows Vale, Dublin 22, Clondalkin, Dublin 22, D22W942、31 Kells Road, Crumlin, Dublin 12；公开看房/开盘：Thorkyll Manor：公开看房：22nd October · 12 pm - 1 pm；下架/失效：Shanganagh Vale、Clay Farm；变化：98 Lissadel Drive, Drimnagh, Dublin 12, D12N573: price_eur 295000 → 415000；98 Lissadel Drive, Drimnagh, Dublin 12, D12N573: status 'Current Listing' → 'Sale Agreed'；1 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 187 个页面，成功核验 82 个。新房目录 6/6 个可访问，核验 21/39 个南都柏林项目详情页。二手 House 搜索覆盖 12/12 个邮区，核验 31/88 个新候选详情页。新增：无新增入选房源；公开看房/开盘：无；下架/失效：Shanganagh Vale、Clay Farm；变化：未发现其他已跟踪房源的明确价格或状态变化；1 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-10-21"
+    "verified_at": "2026-10-22"
   }
 ]
