@@ -701,7 +701,9 @@ def _refresh_insights(
     )
     added_text = "、".join(result.added[:8]) if result.added else "无新增入选房源"
     warning_text = f"；{len(result.warnings)} 个来源未完成刷新，已保留原核验日期" if result.warnings else ""
-    event_text = "、".join(result.events[:6]) if result.events else ""
+    # Event hints are not authoritative enough for the daily headline.
+    # Avoid promoting potentially stale dates in a summary.
+    event_text = ""
 
     price_down = 0
     price_up = 0
@@ -740,7 +742,7 @@ def _refresh_insights(
             "今日无实质更新"
             if not result.added and not result.unavailable and not result.changed
             else (
-                f"今日变化：新增 {len(result.added)}、公开看房/开盘 {len(result.events)}、"
+                f"今日变化：新增 {len(result.added)}、公开看房/开盘 待人工确认、"
                 f"下架/失效 {len(result.unavailable)}、降价 {price_down}、涨价 {price_up}、"
                 f"状态变化 {status_changes}、其他字段变化 {other_changes}"
             )
