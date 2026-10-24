@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import re
+from datetime import date
 from collections import OrderedDict
 from pathlib import Path
 
@@ -260,6 +262,18 @@ def generate(
 
     for item in rows:
         validate_direct_url(str(item.url), title=item.display_title)
+
+    # Fail closed for open-viewing announcements: a refreshed page is NOT proof
+    # that an undated or previously announced event is happening today.
+    # Only explicitly dated future events may appear as actionable invitations.
+    today = dublin_now().date()
+    for item in rows:
+        if not item.public_event:
+            continue
+        dates = re.findall(r"(?<!\\d)(20\\d{2}-\\d{2}-\\d{2})(?!\\d)", item.public_event)
+        if not dates or not any(date.fromisoformat(d) >= today for d in dates):
+            item.public_event = ""
+            item.public_event_verified_at = None
 
     buckets = organize(rows)
     insight_buckets = organize_insights(insights)
