@@ -33,6 +33,7 @@ from .new_build_discovery import (
     write_candidate_file,
 )
 from .report_validation import validate_direct_url
+from .viewing_safety import safe_event
 
 RESALE_DISTRICTS = (2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24)
 DEFAULT_DISCOVERY_URL = (
@@ -668,6 +669,7 @@ def _discover_new_build_candidates(
                 if candidate is None:
                     continue
                 hinted_event = event_hints.get(link) or event_hints.get(final_url)
+                hinted_event = safe_event(hinted_event, verified_date)
                 if hinted_event and hinted_event != candidate.public_event:
                     candidate = candidate.model_copy(
                         update={
@@ -1002,6 +1004,9 @@ def refresh_sales_data(
     }
     refreshed_with_change_dates: list[SalesListing] = []
     for item in refreshed:
+        safe = safe_event(item.public_event, verified_date)
+        if safe != item.public_event:
+            item = item.model_copy(update={"public_event": safe, "public_event_verified_at": verified_date if safe else None})
         if item.scheme in discoverable_schemes:
             previous = current_projects_by_key.get(project_key(item))
             if previous is not None:
