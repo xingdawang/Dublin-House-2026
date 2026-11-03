@@ -395,3 +395,77 @@ def test_private_listing_redirected_to_search_page_is_removed_from_report(tmp_pa
 
     assert result.unavailable == ["Removed resale"]
     assert json.loads(listings.read_text(encoding="utf-8")) == []
+
+
+def test_refresh_insights_drops_old_market_commentary(tmp_path):
+    from dublin_house.sales_refresh import RefreshResult, _refresh_insights
+
+    insights = tmp_path / "insights.json"
+    insights.write_text(
+        json.dumps(
+            [
+                {
+                    "section": "market_watch",
+                    "source": "Old observation",
+                    "title": "Historical planning note",
+                    "url": "https://example.com/old",
+                    "summary": "Old and no longer current",
+                    "verified_at": "2026-07-26",
+                },
+                {
+                    "section": "market_watch",
+                    "source": "Fresh observation",
+                    "title": "Recent planning note",
+                    "url": "https://example.com/current",
+                    "summary": "Checked within 30 days",
+                    "verified_at": "2026-10-28",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    _refresh_insights(insights, RefreshResult(), "2026-11-03", "https://example.com/search")
+    rows = json.loads(insights.read_text(encoding="utf-8"))
+    assert [row["source"] for row in rows] == ["Fresh observation", "Automated sales refresh"]
+    assert rows[-1]["title"] == "今日无实质更新"
+
+
+def test_previously_unavailable_project_is_not_counted_as_newly_removed(tmp_path, monkeypatch):
+    listings = tmp_path / "sales.json"
+    insights = tmp_path / "insights.json"
+    candidates = tmp_path / "candidates.json"
+    closed = _listing(
+        "Already unavailable",
+        address="Existing Watchlist, Dublin 18",
+        scheme="sales_agent_new_build",
+    ).model_copy(update={"status": "Unavailable / Watchlist", "changed_at": "2026-10-09"})
+    listings.write_text(json.dumps([closed.model_dump(mode="json")]), encoding="utf-8")
+    insights.write_text("[]", encoding="utf-8")
+
+    class DummyClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+    def fake_fetch(_client, url, **_kwargs):
+        if url == str(closed.url):
+            return httpx.Response(404, request=httpx.Request("GET", url))
+        raise RuntimeError("offline")
+
+    monkeypatch.setattr("dublin_house.sales_refresh._client", DummyClient)
+    monkeypatch.setattr("dublin_house.sales_refresh._fetch", fake_fetch)
+    result = refresh_sales_data(
+        listings_file=listings,
+        insights_file=insights,
+        new_build_candidates_file=candidates,
+        discovery_url="https://search.example/houses",
+        new_build_sources=(),
+        min_new_build_sources=0,
+    )
+    rows = json.loads(listings.read_text(encoding="utf-8"))
+    assert result.unavailable == []
+    assert rows[0]["status"] == "Unavailable / Watchlist"
+    assert rows[0]["changed_at"] == "2026-10-09"
