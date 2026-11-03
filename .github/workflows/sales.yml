@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/manual-run/sales"
   schedule:
-    - cron: "0 7 * * *"
+    # Multiple early, off-hour slots hedge against delayed GitHub schedule events.
+    # Daily guard below guarantees only one scheduled email, not one per slot.
+    - cron: "37 2-7 * * *"
       timezone: "Europe/Dublin"
 
 permissions:
@@ -26,22 +28,46 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Sync main and check daily morning delivery
+        id: daily
+        shell: bash
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+          today="$(TZ=Europe/Dublin date +%F)"
+          clock="$(TZ=Europe/Dublin date +%H%M)"
+          sent="$(cat data/sales_last_sent_date.txt 2>/dev/null || true)"
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" && "$clock" < "0630" ]]; then
+            echo "Skip early scheduled slot at $clock (Europe/Dublin)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_EVENT_NAME" == "schedule" && "$sent" == "$today" ]]; then
+            echo "Already sent sales report for $today; skipping duplicate."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Check baseline data
+        if: steps.daily.outputs.skip != 'true'
         run: |
           test -f data/sales_listings.json
           test -f data/sales_insights.json
           test -f data/sales_new_build_candidates.json
 
       - name: Set up Python
+        if: steps.daily.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
 
       - name: Install dependencies
+        if: steps.daily.outputs.skip != 'true'
         run: pip install -r requirements.txt
 
       - name: Refresh and compare sales sources
+        if: steps.daily.outputs.skip != 'true'
         run: >-
           python scripts/refresh_sales.py --strict --discovery-limit 8 --max-new 12
           --max-private 6 --max-apartment-only 1 --new-build-detail-limit 40
@@ -50,9 +76,11 @@ jobs:
           --min-new-build-sources 2
 
       - name: Run tests
+        if: steps.daily.outputs.skip != 'true'
         run: pytest -q
 
       - name: Preflight HTML, CID map and SMTP
+        if: steps.daily.outputs.skip != 'true'
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
@@ -61,6 +89,7 @@ jobs:
         run: python scripts/run_sales.py --preflight
 
       - name: Generate and send one canonical email
+        if: steps.daily.outputs.skip != 'true'
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
@@ -69,14 +98,18 @@ jobs:
         run: python scripts/run_sales.py --send
 
       - name: Persist refreshed source data
+        if: steps.daily.outputs.skip != 'true'
         shell: bash
         run: |
-          if [[ -z "$(git status --porcelain -- data/sales_listings.json data/sales_insights.json data/sales_new_build_candidates.json)" ]]; then
+          # Stamp successful sends only AFTER SMTP succeeds.
+          today="$(TZ=Europe/Dublin date +%F)"
+          printf '%s\n' "$today" > data/sales_last_sent_date.txt
+          if [[ -z "$(git status --porcelain -- data/sales_listings.json data/sales_insights.json data/sales_new_build_candidates.json data/sales_last_sent_date.txt)" ]]; then
             echo "No source-data changes to persist."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sales_listings.json data/sales_insights.json data/sales_new_build_candidates.json
+          git add data/sales_listings.json data/sales_insights.json data/sales_new_build_candidates.json data/sales_last_sent_date.txt
           git commit -m "data: refresh sales sources $(TZ=Europe/Dublin date +%F)"
           git push
