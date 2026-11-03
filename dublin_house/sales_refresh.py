@@ -4,6 +4,7 @@ import json
 import re
 import time
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 from html import unescape
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -692,7 +693,13 @@ def _refresh_insights(
     discovery_url: str,
 ) -> None:
     existing = load_json_rows(insights_path) if insights_path.exists() else []
-    existing = [row for row in existing if row.get("source") != "Automated sales refresh"]
+    # Historical commentary must not masquerade as current market news.
+    cutoff = (date.fromisoformat(verified_date) - timedelta(days=30)).isoformat()
+    existing = [
+        row for row in existing
+        if row.get("source") != "Automated sales refresh"
+        and str(row.get("verified_at", ""))[:10] >= cutoff
+    ]
     non_event_changes = [change for change in result.changed if ": public_event " not in change]
     change_text = (
         "；".join(non_event_changes[:8])
@@ -813,12 +820,15 @@ def refresh_sales_data(
             try:
                 response = _fetch(client, str(item.url))
                 if response.status_code == 404:
-                    result.unavailable.append(item.title)
+                    # A previously closed project is not a NEW removal each day.
+                    newly_unavailable = not item.is_closed
+                    if newly_unavailable:
+                        result.unavailable.append(item.title)
                     refreshed.append(
                         item.model_copy(
                             update={
                                 "status": "Unavailable / Watchlist",
-                                "changed_at": verified_date,
+                                "changed_at": verified_date if newly_unavailable else item.changed_at,
                             }
                         )
                     )
@@ -839,15 +849,17 @@ def refresh_sales_data(
                 if item.scheme == "private_sale" and any(
                     token in reason for token in ("search page", "search/category page", "category page")
                 ):
+                    newly_unavailable = not item.is_closed
                     refreshed.append(
                         item.model_copy(
                             update={
                                 "status": "Unavailable / Watchlist",
-                                "changed_at": verified_date,
+                                "changed_at": verified_date if newly_unavailable else item.changed_at,
                             }
                         )
                     )
-                    result.unavailable.append(item.title)
+                    if newly_unavailable:
+                        result.unavailable.append(item.title)
                 else:
                     refreshed.append(item)
                     result.warnings.append(f"{item.title}: {exc}")
