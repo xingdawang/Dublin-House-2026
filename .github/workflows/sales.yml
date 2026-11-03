@@ -8,7 +8,7 @@ on:
   schedule:
     # Multiple early, off-hour slots hedge against delayed GitHub schedule events.
     # Daily guard below guarantees only one scheduled email, not one per slot.
-    - cron: "37 2-7 * * *"
+    - cron: "37 0-7 * * *"
       timezone: "Europe/Dublin"
 
 permissions:
