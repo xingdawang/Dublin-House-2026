@@ -85,6 +85,8 @@ BEDROOM_RE = re.compile(r"\b([1-6])\s*(?:bed|bedroom)s?\b", re.IGNORECASE)
 BER_RE = re.compile(r"\b(A[1-3]|B[1-3])\b", re.IGNORECASE)
 NEW_HOME_TOKENS = (
     "new home",
+    "choose your home",
+    "property types available",
     "new development",
     "available property",
     "available properties",
@@ -193,9 +195,40 @@ def house_price_summary(text: str) -> str:
         price = int(match.group(3).replace(",", ""))
         if 100_000 <= price <= 5_000_000:
             by_bed[bed] = min(price, by_bed.get(bed, price))
+    # Evara uses icon text "bed 3 straighten ... euro From €585,000
+    # holiday_village House", rather than "3 Bed ... House €585,000".
+    # Match a single card at a time to avoid borrowing a price from a
+    # following apartment/duplex card.
+    type_prices: list[str] = []
+    evara_cards = re.finditer(
+        r"\bbed\s+([1-6])\s+straighten\b(.{0,150}?)(?=\bbed\s+[1-6]\s+straighten\b|$)",
+        normalized,
+        re.IGNORECASE,
+    )
+    for card in evara_cards:
+        body = card.group(2)[:130]
+        if not re.search(r"\bholiday_village\s+House\b", body, re.IGNORECASE):
+            continue
+        price_match = re.search(r"€\s*([0-9][0-9,]{4,})", body)
+        if not price_match:
+            continue
+        bed = int(card.group(1))
+        price = int(price_match.group(1).replace(",", ""))
+        if 100_000 <= price <= 5_000_000:
+            by_bed[bed] = min(price, by_bed.get(bed, price))
+            prefix = normalized[max(0, card.start() - 115):card.start()]
+            named = re.search(
+                r"\b(The [A-Za-z][A-Za-z'-]+)\s+[^,]{2,75},\s*[^,]{2,50}\s*$",
+                prefix,
+            )
+            if named:
+                type_prices.append(f"{named.group(1)} €{price:,}")
     if not by_bed:
         return ""
-    return "House参考：" + "；".join(f"{bed}居 €{price:,}起" for bed, price in sorted(by_bed.items()))
+    summary = "House参考：" + "；".join(f"{bed}居 €{price:,}起" for bed, price in sorted(by_bed.items()))
+    if type_prices:
+        summary += "；具体户型：" + "、".join(dict.fromkeys(type_prices))
+    return summary
 
 
 def discover_project_event_hints(
@@ -266,7 +299,11 @@ DEFAULT_NEW_BUILD_SOURCES = (
         name="Evara developments",
         provider="Evara",
         scheme="developer_new_build",
-        catalog_urls=("https://evara.ie/", "https://evara.ie/development-sitemap.xml"),
+        catalog_urls=(
+            "https://evara.ie/",
+            "https://evara.ie/development-sitemap.xml",
+            "https://evara.ie/find-a-home/",
+        ),
         detail_path_pattern=r"/development/[^/]+/?",
         authority_rank=10,
     ),
@@ -361,6 +398,14 @@ def discover_project_links(
     soup = _strip_page_chrome(BeautifulSoup(html, "html.parser"))
     for anchor in soup.find_all("a", href=True):
         absolute = _clean_url(urljoin(catalog_url, str(anchor["href"])))
+        if source.name == "Evara developments":
+            # The live Find Your Home page links to individual house types
+            # (/development/aderrig/the-finisk/). Follow their parent project
+            # without adding every unit type as a separate map marker.
+            parsed = urlparse(absolute)
+            match = re.fullmatch(r"/development/([^/]+)/[^/]+/?", parsed.path)
+            if match:
+                absolute = parsed._replace(path=f"/development/{match.group(1)}/").geturl()
         if absolute in seen or not source.accepts(absolute):
             continue
         anchor_text = " ".join(anchor.stripped_strings).strip()
@@ -501,6 +546,19 @@ def parse_new_build_detail(
     validate_direct_url(url, title=f"{source.name} candidate")
     text = content_text(html)
     soup = BeautifulSoup(html, "html.parser")
+    # Evara's project headline is in <main>, but its "Choose your home"
+    # cards (house types and prices) live outside <main>.  Limiting evidence
+    # to <main> silently rejected otherwise valid Evara project pages.
+    if source.name == "Evara developments":
+        content_soup = _strip_page_chrome(BeautifulSoup(html, "html.parser"))
+        root = content_soup.body or content_soup
+        all_text = " ".join(root.stripped_strings)
+        start = all_text.casefold().find("choose your home")
+        if start >= 0:
+            end = all_text.casefold().find("journey times", start)
+            text = all_text[start:end if end >= 0 else None]
+        else:
+            text = all_text
     evidence = f"{text} {_metadata_text(soup)}".strip()
     folded = evidence.casefold()
     if not is_south_dublin(evidence) or not any(token in folded for token in NEW_HOME_TOKENS):
