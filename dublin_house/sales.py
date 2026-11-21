@@ -253,6 +253,23 @@ def generate(
     insight_source = insights_file or os.getenv("SALES_INSIGHTS_FILE", "data/sales_insights.json")
 
     rows = [SalesListing.model_validate(row) for row in load_json_rows(source)]
+    # Keep the entire verified candidate pool visible even when the main
+    # project-selection cap is full. Candidate items are not treated as
+    # available inventory or added to the 35-marker Google map.
+    candidate_path = Path(os.getenv("SALES_NEW_BUILD_CANDIDATES_FILE", "data/sales_new_build_candidates.json"))
+    deferred_candidates: list[SalesListing] = []
+    if candidate_path.exists() and data_file is None:
+        from .new_build_discovery import project_key
+
+        active_keys = {project_key(item) for item in rows}
+        deferred_candidates = [
+            item for item in (SalesListing.model_validate(record) for record in load_json_rows(candidate_path))
+            if not item.is_closed and project_key(item) not in active_keys
+        ]
+        deferred_candidates.sort(
+            key=lambda item: (item.verified_at != dublin_now().date().isoformat(),
+                              item.price_eur is None, item.price_eur or 10**12)
+        )
     insight_path = Path(insight_source)
     insights = (
         [SalesInsight.model_validate(row) for row in load_json_rows(insight_path)]
@@ -323,6 +340,7 @@ def generate(
         map_overview_url=map_overview_url,
         google_static_map_url=map_result.url,
         map_labels=map_labels,
+        deferred_candidates=deferred_candidates,
     )
     report_path = output_dir() / "sales_report.html"
     report_path.write_text(html, encoding="utf-8")
