@@ -400,3 +400,47 @@ def test_strict_refresh_fails_when_new_build_catalogs_are_unreachable(tmp_path, 
             min_new_build_sources=1,
             strict=True,
         )
+
+
+
+def test_evara_cards_offer_precise_named_house_type_prices():
+    text = (
+        "Choose your home 6 Property Types available in this Development "
+        "The Brook Aderrig , Adamstown bed 2 straighten 840 sqft euro From €450,000 home Apartment "
+        "The Dargle Aderrig , Adamstown bed 3 straighten 1119 sqft euro From €525,000 home Duplex "
+        "The Delvin Aderrig , Adamstown bed 3 straighten 1130 sqft euro From €545,000 holiday_village House "
+        "The Finisk Aderrig , Adamstown bed 3 straighten 1216 sqft euro From €585,000 holiday_village House"
+    )
+    summary = house_price_summary(text)
+    assert "3居 €545,000起" in summary
+    assert "The Finisk €585,000" in summary
+    assert "€450,000" not in summary
+    assert "€525,000" not in summary
+
+
+def test_evara_pricing_cards_outside_main_are_parsed():
+    evara = next(s for s in DEFAULT_NEW_BUILD_SOURCES if s.name == "Evara developments")
+    html = (
+        "<html><head><title>Aderrig - Evara</title></head><body>"
+        "<main><h1>Aderrig</h1><p>Final homes in Adamstown</p></main>"
+        "<section><h2>Choose your home</h2><p>Property Types available in this Development</p>"
+        "<p>The Brook Aderrig , Adamstown bed 2 straighten 840 sqft euro From €450,000 home Apartment</p>"
+        "<p>The Finisk Aderrig , Adamstown bed 3 straighten 1216 sqft euro From €585,000 holiday_village House</p>"
+        "</section><section><h2>Journey times</h2></section></body></html>"
+    )
+    item = parse_new_build_detail(html, "https://evara.ie/development/aderrig/", evara, "2026-11-21")
+    assert item is not None
+    assert item.price_eur == 450000
+    assert "The Finisk €585,000" in item.house_price_summary
+
+
+
+def test_evara_find_home_discovers_project_from_new_house_type_page():
+    evara = next(s for s in DEFAULT_NEW_BUILD_SOURCES if s.name == "Evara developments")
+    html = """
+      <main><article><h2>The Finisk Aderrig, Adamstown</h2>
+      <p>3-bed house available from €585,000</p>
+      <a href="/development/aderrig/the-finisk/">View home</a></article></main>
+    """
+    links = discover_project_links(html, "https://evara.ie/find-a-home/", evara, south_only=True)
+    assert links == ["https://evara.ie/development/aderrig/"]
