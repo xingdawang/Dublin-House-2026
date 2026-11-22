@@ -2,10 +2,10 @@
   {
     "section": "price_change",
     "source": "Automated sales refresh",
-    "title": "今日变化：新增 0、公开看房/开盘 待人工确认、下架/失效 0、降价 0、涨价 0、状态变化 0、其他字段变化 3",
+    "title": "今日无实质更新",
     "url": "https://www.daft.ie/property-for-sale/dublin-22-dublin/houses?numBeds_from=3&price_to=425000&sort=priceAsc",
-    "summary": "本轮检查 172 个页面，成功核验 69 个。新房目录 5/6 个可访问，核验 21/38 个南都柏林项目详情页。二手 House 搜索覆盖 9/12 个邮区，核验 18/67 个新候选详情页。新增：无新增入选房源；公开看房/开盘：无；下架/失效：无；变化：Rockville Manor: bedrooms 3 → 1；Grainger Woods, Adamstown, Lucan, Co. Dublin: house_price_summary 'House参考：3居 €550,000起；4居 €635,000起；5居 €710,000起' → 'House参考：3居 €550,000起；4居 €599,999起；5居 €710,000起'；Kilternan Village: bedrooms 3 → 1；18 个来源未完成刷新，已保留原核验日期。",
+    "summary": "本轮检查 177 个页面，成功核验 71 个。新房目录 5/6 个可访问，核验 21/38 个南都柏林项目详情页。二手 House 搜索覆盖 9/12 个邮区，核验 18/74 个新候选详情页。新增：无新增入选房源；公开看房/开盘：无；下架/失效：无；变化：未发现其他已跟踪房源的明确价格或状态变化；13 个来源未完成刷新，已保留原核验日期。",
     "status": "自动刷新结果",
-    "verified_at": "2026-11-21"
+    "verified_at": "2026-11-22"
   }
 ]
